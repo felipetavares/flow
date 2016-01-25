@@ -28,6 +28,16 @@ to contribut use PRs.
 
 Will be represented using github issues.
 
+# Interface Example
+
+```
+#+#
+#@#
+###
+
+% go north
+```
+
 # Thank you
 
 for motivating me to start this project! 
