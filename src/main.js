@@ -12,18 +12,19 @@ var Vec = require('./vec/lib.js');
 
 console.log('Flow Client');
 console.log('Version '+Package.version);
+console.log();
 
 function main () {
     var character = new Character.Character();
-    var randomMap = new Map.Map();
+    var map = new Map.Map();
 
-    randomMap.add(character);
+    map.add(character);
 
-    character.move(new Vec.Vec2(0, -1));
-    character.move(new Vec.Vec2(2, 0));
-    character.move(new Vec.Vec2(0, 8));
-
-    console.log(character.pos.str());
+    map.draw();
+    console.log();
+    console.log('% ');
+    
+    // Read user input
 }
 
 main();

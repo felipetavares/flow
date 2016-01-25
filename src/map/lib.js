@@ -8,19 +8,19 @@ var DefaultObject = {
 
 function Map () {
     this.min = new Vec.Vec2(0, 0);
-    this.max = new Vec.Vec2(0, 0);
+    this.max = new Vec.Vec2(1, 1);
 
     this.objects = new Array();
     
     this.pushBoundaries = function (o) {
 	if (o.pos.x < this.min.x)
-	    this.min.x = o.pos.x;
+	    this.min.x = o.pos.x-1;
 	if (o.pos.y < this.min.y)
-	    this.min.y = o.pos.y;
+	    this.min.y = o.pos.y-1;
 	if (o.pos.x > this.max.x)
-	    this.min.x = o.pos.x;
+	    this.min.x = o.pos.x+1;
 	if (o.pos.y > this.max.y)
-	    this.min.y = o.pos.y;
+	    this.min.y = o.pos.y+1;
     }
 
     this.add = function (o) {
@@ -82,6 +82,27 @@ function Map () {
 
     this.collide = function () {
 	return true;
+    }
+
+    this.queryCharacter = function (p) {
+	for (var o in this.objects) {
+	    if (this.objects[o].pos.eq(p)) {
+		return this.objects[o].character();
+	    }
+	}
+	return ' ';
+    }
+
+    this.draw = function () {
+	var size = this.max.sub(this.min);
+
+	for (var y=0;y<size.y;y++) {
+	    var line = '';
+	    for (var x=0;x<size.x;x++) {
+		line += this.queryCharacter(this.min.add(new Vec.Vec2(x, y)));
+	    }
+	    console.log(line);
+	}
     }
 }
 

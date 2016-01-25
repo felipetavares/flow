@@ -5,6 +5,10 @@ function Character () {
     this.pos = new Vec.Vec2();
 
     this.move = Map.DefaultObject.move;
+
+    this.character = function () {
+	return '@';
+    }
 }
 
 module.exports = {
