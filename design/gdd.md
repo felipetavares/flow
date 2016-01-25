@@ -24,6 +24,10 @@ https://github.com/felipetavares/flow
 
 to contribut use PRs.
 
+# Goals
+
+Will be represented using github issues.
+
 # Thank you
 
 for motivating me to start this project! 
