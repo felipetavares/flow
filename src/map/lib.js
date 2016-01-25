@@ -12,9 +12,7 @@ function Map () {
 
     this.objects = new Array();
     
-    this.add = function (o) {
-	// Update map boundaries
-
+    this.pushBoundaries = function (o) {
 	if (o.pos.x < this.min.x)
 	    this.min.x = o.pos.x;
 	if (o.pos.y < this.min.y)
@@ -23,6 +21,10 @@ function Map () {
 	    this.min.x = o.pos.x;
 	if (o.pos.y > this.max.y)
 	    this.min.y = o.pos.y;
+    }
+
+    this.add = function (o) {
+	this.pushBoundaries(o);
 
 	o.map = this;
 
@@ -38,6 +40,9 @@ function Map () {
 	    return false;
 	} else {
 	    object.pos.addeq(delta);
+
+	    this.pushBoundaries(object);
+
 	    return true;
 	}
     }
