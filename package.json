@@ -1,0 +1,19 @@
+{
+	"name": "flow",
+	"version": "0.1.0",
+
+	"repository": "https://github.com/felipetavares/flow.git",
+	"readme": "README.md",
+
+	"description": "Flow wants to be a MUD",
+	"author": "Felipe Tavares",
+	"engines": {
+		"node": ">=0.10"
+	},
+	"dependencies": {
+	
+	},
+	"bin": {
+		"flow": "src/main.js"
+	}
+}
