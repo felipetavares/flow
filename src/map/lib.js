@@ -56,7 +56,6 @@ function Map () {
 	position.assign(start.add(new Vec.Vec2(0.5, 0.5)));
 
 	while (!position.integer().eq(end.integer())) {
-	    console.log(position.str());
 	    position.addeq(increment);
 	    positions.push(position.integer());
 	}

@@ -37,13 +37,16 @@ stdin.addListener('data', function(data) {
 	return;
     }
 
-    game.execute(input);
-
-    draw();
+    draw(game.execute(input));
 });
 
-function draw () {
-    game.map.draw();
+function draw (full) {
+    if (full) {
+	game.map.draw();
+    } else {
+	console.log('command not recognized.');
+    }
+
     console.log();
     process.stdout.write('% ');
 }
@@ -55,4 +58,4 @@ function init () {
 }
 
 init();
-draw();
+draw(true);

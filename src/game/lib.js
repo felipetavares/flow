@@ -11,9 +11,12 @@ function Game () {
 
     this.execute = function (input) {
 	for (var c in this.cmds) {
-	    if (this.cmds[c].execute(input))
-		break;
+	    if (this.cmds[c].execute(input)) {
+		return true;
+	    }
 	}
+	
+	return false;
     }
 
     this.addCmd = function (cmd) {

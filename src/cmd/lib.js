@@ -48,6 +48,8 @@ function Cmd (number, args){
 	} else {
 	    return false;
 	}
+
+	return true;
     }
 }
 
