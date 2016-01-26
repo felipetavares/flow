@@ -4,6 +4,7 @@ var Package = require('../package.json');
 var Objects = require('./objects/lib.js');
 var Map = require('./map/lib.js');
 var Vec = require('./vec/lib.js');
+var Game = require('./game/lib.js');
 
 // Log information about the client before starting.
 
@@ -15,9 +16,8 @@ console.log('Version '+Package.version);
 console.log();
 
 var stdin = process.openStdin();
-var character = new Objects.Character();
-var map = new Map.Map();
-map.add(character);
+
+var game = new Game.Game();
 
 stdin.addListener('data', function(data) {
     var input = data.slice(0, data.length-1)
@@ -27,16 +27,16 @@ stdin.addListener('data', function(data) {
 	input[0] == 'go') {
 
 	if (input[1] == 'north') {
-	    character.move(new Vec.Vec2(0, -1));
+	    game.character.move(new Vec.Vec2(0, -1));
 	} else
 	if (input[1] == 'south') {
-	    character.move(new Vec.Vec2(0, 1));
+	    game.character.move(new Vec.Vec2(0, 1));
 	} else
 	if (input[1] == 'west') {
-	    character.move(new Vec.Vec2(-1, 0));
+	    game.character.move(new Vec.Vec2(-1, 0));
 	} else
 	if (input[1] == 'east') {
-	    character.move(new Vec.Vec2(1, 0));
+	    game.character.move(new Vec.Vec2(1, 0));
 	}
 	
 	draw();
@@ -50,9 +50,9 @@ stdin.addListener('data', function(data) {
 });
 
 function draw () {
-    map.draw();
+    game.map.draw();
     console.log();
-    stdin.write('% ');
+    process.stdout.write('% ');
 }
 
 draw();
