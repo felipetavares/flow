@@ -9,8 +9,8 @@ var Cmd = require('./cmd/lib.js');
 
 // Log information about the client before starting.
 
-// TODO: Use a flag instead of always logging. When -v is passed,
-// print info and exit.
+// TODO: Use a flag instead of always logging.
+// When -v is passed, print info and exit.
 
 console.log('Flow Client');
 console.log('Version '+Package.version);
@@ -22,6 +22,14 @@ var game = new Game.Game();
 stdin.addListener('data', function(data) {
     var input = data.slice(0, data.length-1)
 	.toString().split(' ');
+
+    // Remove blanks
+    for (var i=0;i<input.length;i++) {
+	if (input[i].length == 0) {
+	    input.splice(i, 1);
+	    i--;
+	}
+    }
 
     if (input.length &&
 	input[0] == 'exit') {
