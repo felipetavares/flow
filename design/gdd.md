@@ -38,6 +38,26 @@ Will be represented using github issues.
 % go north
 ```
 
+## The `go` command
+
+The `go` command when called without arguments, makes the character move
+to the last direction he/she moved.
+
+When used with one argument (if there is more than one argument, the remaining is ignored) `go` moves the character to the direction indicated by the argument.
+
+This direction can be:
+
+* `n`
+* `s`
+* `w`
+* `e`
+* `ne`
+* `nw`
+* `se`
+* `sw`
+
+Long forms of these directions (north, south, etc) are also supported.
+
 # Thank you
 
 for motivating me to start this project! 
