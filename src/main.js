@@ -5,6 +5,7 @@ var Objects = require('./objects/lib.js');
 var Map = require('./map/lib.js');
 var Vec = require('./vec/lib.js');
 var Game = require('./game/lib.js');
+var Cmd = require('./cmd/lib.js');
 
 // Log information about the client before starting.
 
@@ -16,37 +17,21 @@ console.log('Version '+Package.version);
 console.log();
 
 var stdin = process.openStdin();
-
 var game = new Game.Game();
 
 stdin.addListener('data', function(data) {
     var input = data.slice(0, data.length-1)
 	.toString().split(' ');
 
-    if (input.length > 1 &&
-	input[0] == 'go') {
-
-	if (input[1] == 'north') {
-	    game.character.move(new Vec.Vec2(0, -1));
-	} else
-	if (input[1] == 'south') {
-	    game.character.move(new Vec.Vec2(0, 1));
-	} else
-	if (input[1] == 'west') {
-	    game.character.move(new Vec.Vec2(-1, 0));
-	} else
-	if (input[1] == 'east') {
-	    game.character.move(new Vec.Vec2(1, 0));
-	}
-	
-	draw();
-
+    if (input.length &&
+	input[0] == 'exit') {
+	process.exit();
 	return;
     }
 
-    if (input[0] == 'exit') {
-	process.exit();
-    }
+    game.execute(input);
+
+    draw();
 });
 
 function draw () {
@@ -55,4 +40,33 @@ function draw () {
     process.stdout.write('% ');
 }
 
+function init () {
+    game.addCmd(new Cmd.Cmd(2, ['go', [
+	new Cmd.Exec('n', function () {
+	    game.character.move(new Vec.Vec2(0, -1))
+	}),
+	new Cmd.Exec('s', function () {
+	    game.character.move(new Vec.Vec2(0, 1))	    
+	}),
+	new Cmd.Exec('e', function () {
+	    game.character.move(new Vec.Vec2(1, 0))
+	}),
+	new Cmd.Exec('w', function () {
+	    game.character.move(new Vec.Vec2(-1, 0))
+	}),
+	new Cmd.Exec('ne', function () {
+	    game.character.move(new Vec.Vec2(1, -1))
+	}),
+	new Cmd.Exec('nw', function () {
+	    game.character.move(new Vec.Vec2(-1, -1))	    
+	}),
+	new Cmd.Exec('se', function () {
+	    game.character.move(new Vec.Vec2(1, 1))
+	}),
+	new Cmd.Exec('sw', function () {
+	    game.character.move(new Vec.Vec2(-1, 1))
+	})]]));
+}
+
+init();
 draw();
