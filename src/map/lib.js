@@ -35,7 +35,7 @@ function Map () {
     // and the delta are integer vectors?
     this.tryMove = function (object, delta) {
 	var positions = this.generatePositions(object.pos, delta);
-
+	
 	if (this.queryObstacles(object, positions)) {
 	    return false;
 	} else {

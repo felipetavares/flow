@@ -1,3 +1,5 @@
+var Vec = require('../vec/lib.js');
+
 function Exec (pattern, fn) {
     this.pattern = pattern;
     this.fn = fn;
@@ -49,7 +51,36 @@ function Cmd (number, args){
     }
 }
 
+function makeDirectionalCommand (cmd, fn) {
+    return new Cmd(2, [cmd, [
+	new Exec('n', function () {
+	    fn(new Vec.Vec2(0, -1));
+	}),
+	new Exec('s', function () {
+	    fn(new Vec.Vec2(0, 1));	    
+	}),
+	new Exec('e', function () {
+	    fn(new Vec.Vec2(1, 0));
+	}),
+	new Exec('w', function () {
+	    fn(new Vec.Vec2(-1, 0));
+	}),
+	new Exec('ne', function () {
+	    fn(new Vec.Vec2(1, -1));
+	}),
+	new Exec('nw', function () {
+	    fn(new Vec.Vec2(-1, -1));	    
+	}),
+	new Exec('se', function () {
+	    fn(new Vec.Vec2(1, 1));
+	}),
+	new Exec('sw', function () {
+	    fn(new Vec.Vec2(-1, 1));
+	})]]);
+}
+
 module.exports = {
     'Cmd': Cmd,
-    'Exec': Exec
+    'Exec': Exec,
+    'makeDirectionalCommand': makeDirectionalCommand
 }

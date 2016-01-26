@@ -49,31 +49,9 @@ function draw () {
 }
 
 function init () {
-    game.addCmd(new Cmd.Cmd(2, ['go', [
-	new Cmd.Exec('n', function () {
-	    game.character.move(new Vec.Vec2(0, -1))
-	}),
-	new Cmd.Exec('s', function () {
-	    game.character.move(new Vec.Vec2(0, 1))	    
-	}),
-	new Cmd.Exec('e', function () {
-	    game.character.move(new Vec.Vec2(1, 0))
-	}),
-	new Cmd.Exec('w', function () {
-	    game.character.move(new Vec.Vec2(-1, 0))
-	}),
-	new Cmd.Exec('ne', function () {
-	    game.character.move(new Vec.Vec2(1, -1))
-	}),
-	new Cmd.Exec('nw', function () {
-	    game.character.move(new Vec.Vec2(-1, -1))	    
-	}),
-	new Cmd.Exec('se', function () {
-	    game.character.move(new Vec.Vec2(1, 1))
-	}),
-	new Cmd.Exec('sw', function () {
-	    game.character.move(new Vec.Vec2(-1, 1))
-	})]]));
+    game.addCmd(Cmd.makeDirectionalCommand('go', function (direction) {
+	game.character.move(direction);
+    }));
 }
 
 init();
