@@ -8,19 +8,19 @@ var DefaultObject = {
 
 function Map () {
     this.min = new Vec.Vec2(0, 0);
-    this.max = new Vec.Vec2(1, 1);
+    this.max = new Vec.Vec2(0, 0);
 
     this.objects = new Array();
     
     this.pushBoundaries = function (o) {
 	if (o.pos.x < this.min.x)
-	    this.min.x = o.pos.x-1;
+	    this.min.x = o.pos.x;
 	if (o.pos.y < this.min.y)
-	    this.min.y = o.pos.y-1;
-	if (o.pos.x > this.max.x)
-	    this.min.x = o.pos.x+1;
-	if (o.pos.y > this.max.y)
-	    this.min.y = o.pos.y+1;
+	    this.min.y = o.pos.y;
+	if (o.pos.x >= this.max.x)
+	    this.max.x = o.pos.x+1;
+	if (o.pos.y >= this.max.y)
+	    this.max.y = o.pos.y+1;
     }
 
     this.add = function (o) {
@@ -90,7 +90,7 @@ function Map () {
 		return this.objects[o].character();
 	    }
 	}
-	return ' ';
+	return '.';
     }
 
     this.draw = function () {

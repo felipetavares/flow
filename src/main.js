@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var Package = require('../package.json');
-var Character = require('./objects/character.js');
+var Objects = require('./objects/lib.js');
 var Map = require('./map/lib.js');
 var Vec = require('./vec/lib.js');
 
@@ -14,17 +14,45 @@ console.log('Flow Client');
 console.log('Version '+Package.version);
 console.log();
 
-function main () {
-    var character = new Character.Character();
-    var map = new Map.Map();
+var stdin = process.openStdin();
+var character = new Objects.Character();
+var map = new Map.Map();
+map.add(character);
 
-    map.add(character);
+stdin.addListener('data', function(data) {
+    var input = data.slice(0, data.length-1)
+	.toString().split(' ');
 
+    if (input.length > 1 &&
+	input[0] == 'go') {
+
+	if (input[1] == 'north') {
+	    character.move(new Vec.Vec2(0, -1));
+	} else
+	if (input[1] == 'south') {
+	    character.move(new Vec.Vec2(0, 1));
+	} else
+	if (input[1] == 'west') {
+	    character.move(new Vec.Vec2(-1, 0));
+	} else
+	if (input[1] == 'east') {
+	    character.move(new Vec.Vec2(1, 0));
+	}
+	
+	draw();
+
+	return;
+    }
+
+    if (input[0] == 'exit') {
+	process.exit();
+    }
+});
+
+function draw () {
     map.draw();
     console.log();
-    console.log('% ');
-    
-    // Read user input
+    stdin.write('% ');
 }
 
-main();
+draw();
