@@ -40,6 +40,7 @@ stdin.addListener('data', function(data) {
     draw(game.execute(input));
 });
 
+
 function draw (full) {
     if (full) {
 	game.map.draw();
