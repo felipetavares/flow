@@ -48,14 +48,15 @@ function Map () {
     }
 
     this.generatePositions = function (start, delta) {
-	var end = start.add(delta);
+	var end = start.add(delta).add(new Vec.Vec2(0.5, 0.5));
 	var positions = new Array();
 	var position = new Vec.Vec2();
 	var increment = delta.norm();
 
-	position.assign(start);
+	position.assign(start.add(new Vec.Vec2(0.5, 0.5)));
 
-	while (!position.eq(end)) {
+	while (!position.integer().eq(end.integer())) {
+	    console.log(position.str());
 	    position.addeq(increment);
 	    positions.push(position.integer());
 	}
