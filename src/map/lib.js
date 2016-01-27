@@ -127,7 +127,8 @@ function Map () {
     this.unserialize = function (of) {
 	var table = {
 	    'Objects.Character': Objects.Character,
-	    'Vec.Vec2': Vec.Vec2
+	    'Vec.Vec2': Vec.Vec2,
+	    'undefined': function () {}
 	};
 	
 	var o = new (table[of.id]);

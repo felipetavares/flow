@@ -1,17 +1,21 @@
 var Objects = require('../objects/lib.js');
 var Map = require('../map/lib.js');
 var Vec = require('../vec/lib.js');
+var Util = require('../util/lib.js');
 
 function Game () {
-    this.character = new Objects.Character();
+    this.character = new Array();
     this.map = new Map.Map();
     this.cmds = new Array();
 
-    this.map.add(this.character);
+    this.add = function (player) {
+	this.character[Util.asKey(player.addr)] = player;
+	this.map.add(player);
+    }
 
-    this.execute = function (input) {
+    this.execute = function (input, addr) {
 	for (var c in this.cmds) {
-	    if (this.cmds[c].execute(input)) {
+	    if (this.cmds[c].execute(input, addr)) {
 		return true;
 	    }
 	}

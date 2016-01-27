@@ -3,6 +3,8 @@
 var Dgram = require('dgram');
 var Game = require('./game/lib.js');
 var Cmd = require('./cmd/lib.js');
+var Objects = require('./objects/lib.js');
+var Util = require('./util/lib.js');
 
 var socket = Dgram.createSocket('udp6');
 var stdin = process.openStdin();
@@ -38,11 +40,14 @@ socket.on('message', function (msg, remoteAddr) {
 
     console.log('a '+action.action);
     
-    game.execute(action.action);
+   game.execute(action.action, remoteAddr);
 
-    var retMsg = new Buffer(JSON.stringify(game.getState(game.character)));
-    
-    socket.send(retMsg, 0, retMsg.length, remoteAddr.port, remoteAddr.address);
+    for (var c in game.character) {
+	var retMsg = new Buffer(JSON.stringify(game.getState(game.character[c])));
+	socket.send(retMsg, 0, retMsg.length,
+		    game.character[c].addr.port,
+		    game.character[c].addr.address);
+    }
 });
 
 socket.on('listening', function () {
@@ -65,9 +70,16 @@ function load () {
 }
 
 function init () {
-    game.addCmd(Cmd.makeDirectionalCommand('go', function (direction) {
-	game.character.move(direction);
+    game.addCmd(Cmd.makeDirectionalCommand('go', function (direction, addr) {
+	if (game.character[Util.asKey(addr)]) {
+	    game.character[Util.asKey(addr)].move(direction);
+	}
     }));
+
+    game.addCmd(new Cmd.Cmd(1, [[new Cmd.Exec('view', function (addr) {
+	game.add(new Objects.Character(addr));
+    })]]));
+
     load();
 }
 
