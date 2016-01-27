@@ -1,10 +1,6 @@
 var Vec = require('../vec/lib.js');
-
-var DefaultObject = {
-    'move': function (delta) {
-	return this.map.tryMove(this, delta);
-    }
-};
+var Packet = require('../packet/lib.js');
+var Objects = require('../objects/lib.js');
 
 function Map () {
     this.min = new Vec.Vec2(0, 0);
@@ -104,9 +100,79 @@ function Map () {
 	    console.log(line);
 	}
     }
+
+    this.serialize = function (o) {
+	var of = {};
+
+	for (var p in o) {
+	    if (p == 'map')
+		continue;
+
+	    if (typeof o[p] === 'function') {
+	    } else if (typeof o[p] === 'object' && !o[p].length) {
+		of[p] = this.serialize(o[p]);
+	    } else if (typeof o[p] === 'object' && o[p].length) {
+		of[p] = new Array();
+		for (var k in o[p]) {
+		    of[p].push(this.serialize(o[p][k]));
+		}
+	    } else {
+		of[p] = o[p];
+	    }
+	}
+
+	return of;
+    }
+
+    this.unserialize = function (of) {
+	var table = {
+	    'Objects.Character': Objects.Character,
+	    'Vec.Vec2': Vec.Vec2
+	};
+	
+	var o = new (table[of.id]);
+
+	for (var p in of) {
+	    if (typeof of[p] === 'object' && !of[p].length) {
+		o[p] = this.unserialize(of[p]);
+	    } else if (typeof of[p] === 'object' && of[p].length) {
+		o[p] = new Array();
+		for (var k in of[p]) {
+		    o[p].push(this.unserialize(of[p][k]));
+		}		
+	    } else {
+		o[p] = of[p];
+	    }
+	}
+
+	return o;
+    }
+
+    this.getState = function (player) {
+	var state = new Packet.WorldState();
+
+	for (var o in this.objects) {
+	    state.objects.push(this.serialize(this.objects[o]));
+	}
+
+	state.min = this.serialize(this.min);
+	state.max = this.serialize(this.max);
+
+	return state;
+    }
+
+    this.loadState = function (state) {
+	this.min = this.unserialize(state.min);
+	this.max = this.unserialize(state.max);
+
+	this.objects = new Array();
+
+	for (var o in state.objects) {
+	    this.add(this.unserialize(state.objects[o]));
+	}
+    }
 }
 
 module.exports = {
     'Map': Map,
-    'DefaultObject': DefaultObject
 };

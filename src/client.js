@@ -5,7 +5,8 @@ var Objects = require('./objects/lib.js');
 var Map = require('./map/lib.js');
 var Vec = require('./vec/lib.js');
 var Game = require('./game/lib.js');
-var Cmd = require('./cmd/lib.js');
+var Dgram = require('dgram');
+var Packet = require('./packet/lib.js');
 
 // Log information about the client before starting.
 
@@ -17,6 +18,7 @@ if (process.argv.length > 2 &&
 }
 
 var stdin = process.openStdin();
+var socket = Dgram.createSocket('udp6');
 var game = new Game.Game();
 
 stdin.on('data', function(data) {
@@ -37,9 +39,16 @@ stdin.on('data', function(data) {
 	return;
     }
 
-    draw(game.execute(input));
+    sendMsg(input);
 });
 
+socket.on('message', function (msg, remoteAddr) {    
+    var state = JSON.parse(msg.toString());
+
+    game.loadState(state);
+
+    draw(true);
+});
 
 function draw (full) {
     if (full) {
@@ -53,10 +62,14 @@ function draw (full) {
 }
 
 function init () {
-    game.addCmd(Cmd.makeDirectionalCommand('go', function (direction) {
-	game.character.move(direction);
-    }));
+    socket.bind();
+    sendMsg(['view']);
+}
+
+function sendMsg (data) {
+    var msg = new Buffer(JSON.stringify(new Packet.Action(data)));
+
+    socket.send(msg, 0, msg.length, 41322, '::1');
 }
 
 init();
-draw(true);
