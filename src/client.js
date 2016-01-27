@@ -9,12 +9,12 @@ var Cmd = require('./cmd/lib.js');
 
 // Log information about the client before starting.
 
-// TODO: Use a flag instead of always logging.
-// When -v is passed, print info and exit.
-
-console.log('Flow Client');
-console.log('Version '+Package.version);
-console.log();
+if (process.argv.length > 2 &&
+    process.argv[2] == '-v') {
+    console.log('Flow Client');
+    console.log('Version '+Package.version);
+    process.exit();
+}
 
 var stdin = process.openStdin();
 var game = new Game.Game();
