@@ -1,4 +1,6 @@
 function Vec2 (x, y) {
+    this.id = 'Vec.Vec2';
+
     this.zero = 0.001;
 
     this.x = x===undefined?0:x;

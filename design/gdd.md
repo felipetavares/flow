@@ -37,7 +37,15 @@ Some interesting scenarios I have in mind:
 
 node.js server and client.
 
-Client sends an action to server, server replies to everyone (in the future everyone involved?) with a list of changes.
+A square centered on the player is the player's *view*. The size of this square can change in-game, but maybe 7x7 or 5x5 is good.
+
+Every message sent from the player to the server is an *action*. To every action, the server replies to all the players within the view of the player who initiated the action with a *world state*.
+
+The world state is an array of all (modified?) objects within the view of a player.
+
+There is one special action, called *view* (used when the player connects), which just informs the server who is the player and the it replies with the world state of the player.
+
+All the messages are **JSON**-based.
 
 # Persistency
 

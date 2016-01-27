@@ -1,10 +1,12 @@
-var Map = require('../map/lib.js');
 var Vec = require('../vec/lib.js');
+var DefaultObject = require('./default.js');
 
 function Character () {
+    this.id = 'Objects.Character';
+
     this.pos = new Vec.Vec2();
 
-    this.move = Map.DefaultObject.move;
+    this.move = DefaultObject.move;
 
     this.character = function () {
 	return '@';

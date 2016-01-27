@@ -22,6 +22,14 @@ function Game () {
     this.addCmd = function (cmd) {
 	this.cmds.push(cmd);
     }
+
+    this.getState = function (player) {
+	return this.map.getState(player);
+    }
+
+    this.loadState = function (state) {
+	this.map.loadState(state);
+    }
 }
 
 module.exports = {
