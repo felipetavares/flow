@@ -6,7 +6,7 @@
 	"readme": "README.md",
 
 	"description": "Flow wants to be a MUD",
-	"author": "Felipe Tavares",
+	"author": "Felipe Tavares et al.",
 	"engines": {
 		"node": ">=0.10"
 	},
@@ -14,6 +14,6 @@
 	
 	},
 	"bin": {
-		"flow": "src/main.js"
+		"flow-client": "src/client.js"
 	}
 }
