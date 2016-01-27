@@ -19,7 +19,7 @@ if (process.argv.length > 2 &&
 var stdin = process.openStdin();
 var game = new Game.Game();
 
-stdin.addListener('data', function(data) {
+stdin.on('data', function(data) {
     var input = data.slice(0, data.length-1)
 	.toString().split(' ');
 
