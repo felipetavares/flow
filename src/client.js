@@ -42,7 +42,7 @@ stdin.on('data', function(data) {
     sendMsg(input);
 });
 
-socket.on('message', function (msg, remoteAddr) {    
+socket.on('message', function (msg, remoteAddr) {
     var state = JSON.parse(msg.toString());
 
     game.loadState(state);
