@@ -4,36 +4,40 @@ var Vec = require('../vec/lib.js');
 var Util = require('../util/lib.js');
 
 function Game () {
-    this.character = new Array();
-    this.map = new Map.Map();
-    this.cmds = new Array();
+  this.character = new Array();
+  this.map = new Map.Map();
+  this.cmds = new Array();
 
-    this.add = function (player) {
-	this.character[Util.asKey(player.addr)] = player;
-	this.map.add(player);
+  /* Only used in the client */
+  this.token = null;
+
+  this.add = function (player) {
+    this.character.push(player);
+    this.map.add(player);
+  }
+
+  this.execute = function (input, addr, token) {
+    for (var c in this.cmds) {
+      if (this.cmds[c].execute(input, addr, token)) {
+      return true;
+      }
     }
 
-    this.execute = function (input, addr) {
-	for (var c in this.cmds) {
-	    if (this.cmds[c].execute(input, addr)) {
-		return true;
-	    }
-	}
-	
-	return false;
-    }
+    return false;
+  }
 
-    this.addCmd = function (cmd) {
-	this.cmds.push(cmd);
-    }
+  this.addCmd = function (cmd) {
+    this.cmds.push(cmd);
+  }
 
-    this.getState = function (player) {
-	return this.map.getState(player);
-    }
+  this.getState = function (player) {
+    return this.map.getState(player);
+  }
 
-    this.loadState = function (state) {
-	this.map.loadState(state);
-    }
+  this.loadState = function (state) {
+    this.map.loadState(state);
+    this.token = state.token;
+  }
 }
 
 module.exports = {

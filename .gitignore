@@ -36,3 +36,7 @@ node_modules
 *~
 \#*\#
 .\#*
+
+# Apps byproducts
+users.json
+map.json

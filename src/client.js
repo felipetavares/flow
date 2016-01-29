@@ -39,7 +39,7 @@ stdin.on('data', function(data) {
 	return;
     }
 
-    sendMsg(input);
+    sendMsg(input, game.token);
 });
 
 socket.on('message', function (msg, remoteAddr) {
@@ -52,9 +52,9 @@ socket.on('message', function (msg, remoteAddr) {
 
 function draw (full) {
     if (full) {
-	game.map.draw();
+      game.map.draw();
     } else {
-	console.log('command not recognized.');
+      console.log('command not recognized.');
     }
 
     console.log();
@@ -62,12 +62,12 @@ function draw (full) {
 }
 
 function init () {
-    socket.bind();
-    sendMsg(['view']);
+  socket.bind();
+  //sendMsg(['view']);
 }
 
-function sendMsg (data) {
-    var msg = new Buffer(JSON.stringify(new Packet.Action(data)));
+function sendMsg (data, token) {
+    var msg = new Buffer(JSON.stringify(new Packet.Action(data, token)));
 
     socket.send(msg, 0, msg.length, 41322, '::1');
 }

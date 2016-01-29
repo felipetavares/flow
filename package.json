@@ -8,7 +8,7 @@
   "description": "Flow wants to be a MUD",
   "author": "Felipe Tavares et al.",
   "engines": {
-    "node": ">=0.10"
+    "node": ">=0.5"
   },
   "dependencies": {
     "sudp": ">=0.1.0"

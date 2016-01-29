@@ -17,7 +17,7 @@ function Cmd (number, args){
     this.number = number;
     this.args = args;
 
-    this.execute = function (input, addr) {
+    this.execute = function (input, addr, token) {
 	if (input.length >= this.number) {
 	    for (var i=0;i<this.number;i++) {
 		if (this.args[i]) {
@@ -27,7 +27,7 @@ function Cmd (number, args){
 				return x != input[i];
 			    } else {
 				if (x.str() == input[i]) {
-				    x.execute(addr);
+				    x.execute(addr, token, input);
 				    return false;
 				} else {
 				    return true;
@@ -55,29 +55,29 @@ function Cmd (number, args){
 
 function makeDirectionalCommand (cmd, fn) {
     return new Cmd(2, [cmd, [
-	new Exec('n', function (addr) {
-	    fn(new Vec.Vec2(0, -1), addr);
+	new Exec('n', function (addr, token) {
+	    fn(new Vec.Vec2(0, -1), addr, token);
 	}),
-	new Exec('s', function (addr) {
-	    fn(new Vec.Vec2(0, 1), addr);	    
+	new Exec('s', function (addr, token) {
+	    fn(new Vec.Vec2(0, 1), addr, token);
 	}),
-	new Exec('e', function (addr) {
-	    fn(new Vec.Vec2(1, 0), addr);
+	new Exec('e', function (addr, token) {
+	    fn(new Vec.Vec2(1, 0), addr, token);
 	}),
-	new Exec('w', function (addr) {
-	    fn(new Vec.Vec2(-1, 0), addr);
+	new Exec('w', function (addr, token) {
+	    fn(new Vec.Vec2(-1, 0), addr, token);
 	}),
-	new Exec('ne', function (addr) {
-	    fn(new Vec.Vec2(1, -1), addr);
+	new Exec('ne', function (addr, token) {
+	    fn(new Vec.Vec2(1, -1), addr, token);
 	}),
-	new Exec('nw', function (addr) {
-	    fn(new Vec.Vec2(-1, -1), addr);	    
+	new Exec('nw', function (addr, token) {
+	    fn(new Vec.Vec2(-1, -1), addr, token);
 	}),
-	new Exec('se', function (addr) {
-	    fn(new Vec.Vec2(1, 1), addr);
+	new Exec('se', function (addr, token) {
+	    fn(new Vec.Vec2(1, 1), addr, token);
 	}),
-	new Exec('sw', function (addr) {
-	    fn(new Vec.Vec2(-1, 1), addr);
+	new Exec('sw', function (addr, token) {
+	    fn(new Vec.Vec2(-1, 1), addr, token);
 	})]]);
 }
 

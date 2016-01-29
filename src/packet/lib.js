@@ -1,9 +1,11 @@
-function Action (action) {
-    this.action = action===undefined?[]:action;
+function Action (action, token) {
+  this.action = action===undefined?[]:action;
+  this.token = token===undefined?'':token;
 }
 
-function WorldState () {
-    this.objects = [];
+function WorldState (token) {
+  this.token = token===undefined?'':token;
+  this.objects = [];
 }
 
 module.exports = {
