@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-var Dgram = require('dgram');
+var Sudp = require('sudp');
 var Game = require('./game/lib.js');
 var Cmd = require('./cmd/lib.js');
 var Objects = require('./objects/lib.js');
 var Util = require('./util/lib.js');
 
-var socket = Dgram.createSocket('udp6');
+var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
 var game = new Game.Game();
 

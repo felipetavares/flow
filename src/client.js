@@ -5,7 +5,7 @@ var Objects = require('./objects/lib.js');
 var Map = require('./map/lib.js');
 var Vec = require('./vec/lib.js');
 var Game = require('./game/lib.js');
-var Dgram = require('dgram');
+var Sudp = require('sudp');
 var Packet = require('./packet/lib.js');
 
 // Log information about the client before starting.
@@ -18,7 +18,7 @@ if (process.argv.length > 2 &&
 }
 
 var stdin = process.openStdin();
-var socket = Dgram.createSocket('udp6');
+var socket = Sudp.createSocket('udp6');
 var game = new Game.Game();
 
 stdin.on('data', function(data) {
