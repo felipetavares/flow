@@ -8,7 +8,7 @@ The world will be generated randomily but just once.
 
 ### IDEA
 
-> Generating it with one more dimension (time) and moving along it, or applying cel> lular automatas to it in real time (both are essentialy the same)
+> Generating it with one more dimension (time) and moving along it, or applying cellular automatas to it in real time (both are essentialy the same)
 
 ## Starting location
 
@@ -31,7 +31,7 @@ Some interesting scenarios I have in mind:
 
 ### IDEA
 
-> Multiple planets with just-in-time generation when a user arrives/teleports to it
+> Multiple planets with just in time generation when a user arrives (or teleports) to it
 
 # Client/Server model
 
@@ -51,7 +51,7 @@ All the messages are **JSON**-based.
 
 Custom file format.
 
-# Tile support 
+# Tile support
 
 Implement tile support, even if the node.js version can only work on a terminal.
 
@@ -69,7 +69,7 @@ to contribut use PRs.
 
 Will be represented using github issues.
 
-# Interface Example
+# Interface
 
 ```
 #+#
@@ -78,6 +78,8 @@ Will be represented using github issues.
 
 % go north
 ```
+
+A detailed discussion of changes to make this interface better can be found at `interface.md`
 
 ## The `go` command
 
@@ -101,4 +103,4 @@ Long forms of these directions (north, south, etc) are also supported.
 
 # Thank you
 
-for motivating me to start this project! 
+for motivating me to start this project!
