@@ -8,5 +8,3 @@ developed just for fun and to integrate the community.
 # Game Design Document
 
 The design document can be found at `design/gdd.md`.
-
-# 

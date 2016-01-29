@@ -13,6 +13,7 @@
 	"dependencies": {
 	},
 	"bin": {
-		"flow-client": "src/client.js"
+		"flow-client": "src/client.js",
+        "flow-server": "src/server.js"
 	}
 }
