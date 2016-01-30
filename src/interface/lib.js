@@ -105,6 +105,31 @@ exports.init = function (_socket, _game) {
   mainMenu();
 
   screen.render();
+
+  map.on('keypress', function (ch, key) {
+    if (ch == 'q') {
+      quit();
+    }
+
+    var dmap = {
+      'l': 'e',
+      '6': 'e',
+      'h': 'w',
+      '4': 'w',
+      'k': 'n',
+      '8': 'n',
+      'j': 's',
+      '2': 's',
+      '7': 'nw',
+      '9': 'ne',
+      '1': 'sw',
+      '3': 'se'
+    };
+
+    if (dmap[ch]) {
+     sendMsg(['go', dmap[ch]], game.token);
+    }
+  });
 }
 
 exports.draw = function () {
@@ -149,31 +174,6 @@ function mainMenu () {
 
 function setkeys () {
   map.focus();
-
-  map.on('keypress', function (ch, key) {
-    if (ch == 'q') {
-      quit();
-    }
-
-    var dmap = {
-      'l': 'e',
-      '6': 'e',
-      'h': 'w',
-      '4': 'w',
-      'k': 'n',
-      '8': 'n',
-      'j': 's',
-      '2': 's',
-      '7': 'nw',
-      '9': 'ne',
-      '1': 'sw',
-      '3': 'se'
-    };
-
-    if (dmap[ch]) {
-     sendMsg(['go', dmap[ch]], game.token);
-    }
-  });
 }
 
 function login (cmd) {

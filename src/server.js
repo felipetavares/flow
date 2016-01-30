@@ -57,11 +57,11 @@ socket.on('error', function (error) {
 
 /* When we receive an UDP packet */
 socket.on('message', function (msg, remoteAddr) {
-  console.log('> from '+remoteAddr.address);
+  console.log('received from '+remoteAddr.address);
 
   var action = JSON.parse(msg.toString());
 
-  console.log('a '+action.action);
+  console.log('action '+action.action[0]);
 
   /* It's not a good idea to log the auth token */
   //console.log('t '+action.token);
@@ -69,12 +69,12 @@ socket.on('message', function (msg, remoteAddr) {
   game.execute(action.action, remoteAddr, action.token);
 
   /* console.log to put up some space for the map */
-  console.log();
+  //console.log();
 
   /* Server-side game visualization, how cool is that? */
-  game.map.draw();
+  //game.map.draw();
 
-  console.log();
+  //console.log();
 
   /* Send game state to users */
   User.update(socket, game);
@@ -152,7 +152,7 @@ function init () {
     }));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
-      console.log('l '+input)
+      console.log('login '+input[1])
 
       var token = User.login(input[1], input[2], addr);
 
@@ -168,7 +168,7 @@ function init () {
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('register', function (addr, token, input) {
-      console.log ('r '+input);
+      console.log ('register '+input[1]);
 
       if (!User.exists(input[1])) {
         var cId = User.createCharacterId();
@@ -185,11 +185,54 @@ function init () {
   });
 }
 
+function doTest (result, expected) {
+  if (result === expected)
+    console.log('[PASS]');
+  else {
+    console.log('[FAIL]');
+    process.exit(1);
+  }
+}
+
+function test () {
+  var v = new Vec.Vec2(0, 0);
+
+  console.log('Executing unit tests...');
+
+  doTest (v.inside(new Vec.Vec2(0, 0),
+                        new Vec.Vec2(1, 1)), true);
+  doTest (v.inside(new Vec.Vec2(-1, -1),
+                        new Vec.Vec2(1, 1)), true);
+  doTest (v.inside(new Vec.Vec2(-1, -1),
+                        new Vec.Vec2(0, 0)), true);
+  doTest (v.inside(new Vec.Vec2(0, 0),
+                        new Vec.Vec2(0, 0)), true);
+  doTest (v.inside(new Vec.Vec2(-2, -2),
+                        new Vec.Vec2(-1, -1)), false);
+  doTest (v.inside(new Vec.Vec2(1, -2),
+                        new Vec.Vec2(2, -1)), false);
+  doTest (v.inside(new Vec.Vec2(1, 1),
+                        new Vec.Vec2(2, 2)), false);
+  doTest (v.inside(new Vec.Vec2(-2, 1),
+                        new Vec.Vec2(-1, 2)), false);
+
+  v = new Vec.Vec2(-14, -41);
+
+  doTest (v.inside(new Vec.Vec2(-22, -45),
+                        new Vec.Vec2(-6, -37)), true);
+
+  console.log('All tests passed.');
+}
+
 /*
   Due to some complex dynamic on the way node loads
   files and on the way we 'unserialize' objects, we
   need to load util at the end of our definitions.
 */
 var Util = require('./util/lib.js');
+
+/* Basic unit testing */
+var Vec = require('./vec/lib.js');
+test();
 
 init();

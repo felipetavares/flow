@@ -62,10 +62,10 @@ function Map () {
 
     position.assign(start.add(new Vec.Vec2(0.5, 0.5)));
 
-    while (!position.integer().eq(end.integer())) {
+    do {
       position.addeq(increment);
       positions.push(position.integer());
-    }
+    } while(!position.integer().eq(end.integer()));
 
     return positions;
   }
@@ -75,7 +75,7 @@ function Map () {
       // TODO: THIS WILL BE VERY SLOW!
       // TODO: Divide to conquest
       for (var o in this.objects) {
-        if (this.objects[o] !== object) {
+        if (this.objects[o] != object) {
           if (this.objects[o].pos.eq(positions[p]) &&
           this.collide(this.objects[o], object)) {
             return true;
@@ -127,15 +127,30 @@ function Map () {
     return string;
   }
 
+  this.getObjectsInView = function (start, size) {
+    var inView = [];
+    for (var o in this.objects) {
+      if (this.objects[o].pos.inside(start, start.add(size)))
+        inView.push(this.objects[o]);
+    }
+    return inView;
+  }
+
   this.getState = function (player) {
     var state = new Packet.WorldState();
+    var viewSize = new Vec.Vec2(16, 8);
+    var inView = this.getObjectsInView(player.pos.sub(viewSize.div(2)),
+                                       viewSize);
 
-    for (var o in this.objects) {
-      state.objects.push(Util.serialize(this.objects[o]));
+    for (var o in inView) {
+      state.objects.push(Util.serialize(inView[o]));
     }
 
-    state.min = Util.serialize(this.min);
-    state.max = Util.serialize(this.max);
+    var min = player.pos.sub(viewSize.div(2));
+    var max = min.add(viewSize);
+
+    state.min = Util.serialize(min);
+    state.max = Util.serialize(max);
 
     return state;
   }
