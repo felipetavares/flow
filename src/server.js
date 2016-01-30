@@ -6,6 +6,7 @@ var Game = require('./game/lib.js');
 var Cmd = require('./cmd/lib.js');
 var Objects = require('./objects/lib.js');
 var User = require('./user/lib.js');
+var Packet = require('./packet/lib.js');
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -114,6 +115,18 @@ function load (done) {
           game.map = JSON.parse(content);
           game.map = Util.unserialize(game.map);
 
+          /*
+            Because the objects weren't added using
+            map.add, they don't have a .map propertie,
+            so we fix this here.
+
+            Maybe it would be better to move this over
+            to a function at map/lib.js?
+          */
+          for (var o in game.map.objects) {
+            game.map.objects[o].map = game.map;
+          }
+
           User.load(done);
         } else {
           User.load(done);
@@ -138,13 +151,20 @@ function init () {
       }
     }));
 
-    game.addCmd(new Cmd.Cmd(1, [[new Cmd.Exec('view', function (addr, token) {
-    })]]));
-
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
       console.log('l '+input)
 
-      User.login(input[1], input[2], addr);
+      var token = User.login(input[1], input[2], addr);
+
+      if (!token) {
+        var state = new Packet.WorldState();
+        state.error = 'Invalid login.';
+        var retMsg = new Buffer(JSON.stringify(state));
+
+        socket.send(retMsg, 0, retMsg.length,
+                    addr.port,
+                    addr.address);
+      }
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('register', function (addr, token, input) {

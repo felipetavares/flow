@@ -6,6 +6,7 @@ function Action (action, token) {
 function WorldState (token) {
   this.token = token===undefined?'':token;
   this.objects = [];
+  this.error = false;
 }
 
 module.exports = {

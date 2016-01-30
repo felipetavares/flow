@@ -112,6 +112,21 @@ function Map () {
     }
   }
 
+  this.toString = function () {
+    var string = '';
+    var size = this.max.sub(this.min);
+
+    for (var y=0;y<size.y;y++) {
+      var line = '';
+      for (var x=0;x<size.x;x++) {
+        line += this.queryCharacter(this.min.add(new Vec.Vec2(x, y)));
+      }
+      string += line+'\n';
+    }
+
+    return string;
+  }
+
   this.getState = function (player) {
     var state = new Packet.WorldState();
 

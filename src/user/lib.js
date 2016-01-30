@@ -19,15 +19,12 @@ function User (name, password, characterId, addr) {
   this.characterIds = characterId===undefined?[]:[characterId];
 
   this.name = name===undefined?'undefined':name;
-  this.password = password===undefined?'':
-  Crypto.createHash('sha256').update(password).digest().toString();
+  this.password = password===undefined?'':password;
 
   /* Last address */
   this.addr = addr;
 
   this.login = function (name, password, addr) {
-    password = Crypto.createHash('sha256').update(password).digest().toString();
-
     if (name == this.name) {
       if (password == this.password) {
         this.addr = addr;
