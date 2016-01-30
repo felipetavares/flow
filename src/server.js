@@ -7,6 +7,8 @@ var Cmd = require('./cmd/lib.js');
 var Objects = require('./objects/lib.js');
 var User = require('./user/lib.js');
 var Packet = require('./packet/lib.js');
+var Test = require('./test/lib.js');
+var Package = require('../package.json')
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -18,6 +20,17 @@ var game = new Game.Game();
 */
 var defaultPort = 41322;
 var mapFileName = 'map.json';
+
+console.log('Version '+Package.version);
+
+/*
+  User -t to execute unit tests
+*/
+if (process.argv.length > 2 &&
+    process.argv[2] == '-t') {
+  Test.test();
+  process.exit();
+}
 
 /* When the user types something */
 stdin.on('data', function(data) {
@@ -194,45 +207,11 @@ function doTest (result, expected) {
   }
 }
 
-function test () {
-  var v = new Vec.Vec2(0, 0);
-
-  console.log('Executing unit tests...');
-
-  doTest (v.inside(new Vec.Vec2(0, 0),
-                        new Vec.Vec2(1, 1)), true);
-  doTest (v.inside(new Vec.Vec2(-1, -1),
-                        new Vec.Vec2(1, 1)), true);
-  doTest (v.inside(new Vec.Vec2(-1, -1),
-                        new Vec.Vec2(0, 0)), true);
-  doTest (v.inside(new Vec.Vec2(0, 0),
-                        new Vec.Vec2(0, 0)), true);
-  doTest (v.inside(new Vec.Vec2(-2, -2),
-                        new Vec.Vec2(-1, -1)), false);
-  doTest (v.inside(new Vec.Vec2(1, -2),
-                        new Vec.Vec2(2, -1)), false);
-  doTest (v.inside(new Vec.Vec2(1, 1),
-                        new Vec.Vec2(2, 2)), false);
-  doTest (v.inside(new Vec.Vec2(-2, 1),
-                        new Vec.Vec2(-1, 2)), false);
-
-  v = new Vec.Vec2(-14, -41);
-
-  doTest (v.inside(new Vec.Vec2(-22, -45),
-                        new Vec.Vec2(-6, -37)), true);
-
-  console.log('All tests passed.');
-}
-
 /*
   Due to some complex dynamic on the way node loads
   files and on the way we 'unserialize' objects, we
   need to load util at the end of our definitions.
 */
 var Util = require('./util/lib.js');
-
-/* Basic unit testing */
-var Vec = require('./vec/lib.js');
-test();
 
 init();

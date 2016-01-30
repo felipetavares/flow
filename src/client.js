@@ -8,8 +8,9 @@ var Game = require('./game/lib.js');
 var Sudp = require('sudp');
 var Interface = require('./interface/lib.js');
 
-// Log information about the client before starting.
-
+/*
+  Log information about the client.
+*/
 if (process.argv.length > 2 &&
     process.argv[2] == '-v') {
     console.log('Flow Client');
