@@ -204,6 +204,7 @@ module.exports = {
   'save': save,
   'add': add,
   'login': login,
+  'logout': logout,
   'createCharacterId': createCharacterId,
   'verify': verify,
   'logged': logged,

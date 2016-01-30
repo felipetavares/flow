@@ -9,6 +9,7 @@ var User = require('./user/lib.js');
 var Packet = require('./packet/lib.js');
 var Test = require('./test/lib.js');
 var Package = require('../package.json')
+var Log = require('./log/lib.js');
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -21,13 +22,15 @@ var game = new Game.Game();
 var defaultPort = 41322;
 var mapFileName = 'map.json';
 
-console.log('Version '+Package.version);
+Log.log('Flow Server Version '+Package.version+'\n');
+Log.heading('start');
 
 /*
   User -t to execute unit tests
 */
 if (process.argv.length > 2 &&
     process.argv[2] == '-t') {
+  Log.heading('test');
   Test.test();
   process.exit();
 }
@@ -65,16 +68,28 @@ stdin.on('data', function(data) {
 });
 
 socket.on('error', function (error) {
-    console.log('error: \n'+error.stack);
+  Log.heading('error');
+  Log.log('Stack: \n'+error.stack);
 });
 
 /* When we receive an UDP packet */
 socket.on('message', function (msg, remoteAddr) {
-  console.log('received from '+remoteAddr.address);
-
   var action = JSON.parse(msg.toString());
 
-  console.log('action '+action.action[0]);
+  Log.heading('action');
+  Log.log('Address: '+remoteAddr.address);
+  Log.log('Port: '+remoteAddr.port);
+  Log.log('Command: '+action.action[0]);
+
+  if (action.token) {
+    var user;
+    if (user = User.get(action.token)) {
+      Log.log('Token: valid');
+      Log.log('User name: '+user.name);
+    } else {
+      Log.log('Token: invalid');
+    }
+  }
 
   /* It's not a good idea to log the auth token */
   //console.log('t '+action.token);
@@ -95,14 +110,18 @@ socket.on('message', function (msg, remoteAddr) {
 
 /* When the server socket is created */
 socket.on('listening', function () {
-    var addr = socket.address();
+  var addr = socket.address();
 
-    console.log('listening at '+addr.address+':'+addr.port);
+  Log.heading('listen');
+  Log.log('Address: '+addr.address);
+  Log.log('Port: '+addr.port);
 });
 
 /* When the server socket is closed (dah) */
 socket.on('close', function () {
+  Log.heading('save');
   save(function () {
+    Log.heading('exit')
     process.exit();
   });
 });
@@ -121,6 +140,8 @@ function save (done) {
 }
 
 function load (done) {
+  Log.heading('load');
+
   Fs.exists(mapFileName, function (exists) {
     if (exists) {
       Fs.readFile(mapFileName, function (error, content) {
@@ -165,7 +186,8 @@ function init () {
     }));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
-      console.log('login '+input[1])
+      Log.heading('login');
+      Log.log('Name: '+input[1])
 
       var token = User.login(input[1], input[2], addr);
 
@@ -177,17 +199,36 @@ function init () {
         socket.send(retMsg, 0, retMsg.length,
                     addr.port,
                     addr.address);
+        Log.log('Status: fail');
+      } else {
+        Log.log('Status: success');
+      }
+    })]]));
+
+    game.addCmd(new Cmd.Cmd(1, [[new Cmd.Exec('logout', function (addr, token, input) {
+      Log.heading('logout');
+
+      var user;
+      if (user = User.get(token)) {
+        var result = User.logout(user.name);
+
+        if (!result) {
+          Log.log('Status: fail');
+        } else {
+          Log.log('Status: success');
+        }
       }
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('register', function (addr, token, input) {
-      console.log ('register '+input[1]);
+      Log.heading('register');
+      Log.log ('Name: '+input[1]);
 
       if (!User.exists(input[1])) {
         var cId = User.createCharacterId();
 
-        console.log ('creating character for newly created user');
-        console.log ('cid is '+cId);
+        Log.log ('Creating character for user');
+        Log.log ('CID is '+cId);
 
         User.add(new User.User(input[1], input[2], cId, addr));
         game.add(new Objects.Character(cId));
@@ -196,15 +237,6 @@ function init () {
 
     socket.bind(defaultPort);
   });
-}
-
-function doTest (result, expected) {
-  if (result === expected)
-    console.log('[PASS]');
-  else {
-    console.log('[FAIL]');
-    process.exit(1);
-  }
 }
 
 /*

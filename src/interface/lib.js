@@ -108,7 +108,9 @@ exports.init = function (_socket, _game) {
 
   map.on('keypress', function (ch, key) {
     if (ch == 'q') {
-      quit();
+      sendMsg(['logout'], game.token, function () {
+        quit();
+      });
     }
 
     var dmap = {
@@ -150,10 +152,10 @@ exports.error = function (error) {
   screen.remove(errorbox);
 }
 
-function sendMsg (data, token) {
+function sendMsg (data, token, done) {
     var msg = new Buffer(JSON.stringify(new Packet.Action(data, token)));
 
-    socket.send(msg, 0, msg.length, 41322, '::1');
+    socket.send(msg, 0, msg.length, 41322, '::1', done);
 }
 
 function mainMenu () {
