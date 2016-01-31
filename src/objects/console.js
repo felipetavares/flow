@@ -1,26 +1,9 @@
 function Console () {
+  DefaultObject.call(this);
+
   this.id = 'Objects.Console';
 
   this.disabled = true;
-
-  this.pos = new Vec.Vec2();
-
-  this.connected = new Array();
-
-  this.connect = function (to, actionsMap) {
-    this.connected.push({
-      uniqueId: to,
-      action: actionsMap
-    });
-  }
-
-  this.activateConnected = function (action) {
-    // Enable all connected objects
-    for (var c in this.connected) {
-      var o = this.map.objects[this.connected[c].uniqueId];
-      o[this.connected[c].action[action]]();
-    }
-  }
 
   this.move = function () {
   }

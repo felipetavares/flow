@@ -1,10 +1,9 @@
 function ConcreteWall () {
+  DefaultObject.call(this);
+
   this.id = 'Objects.ConcreteWall';
 
-  this.pos = new Vec.Vec2();
-
   this.move = function () {
-
   }
 
   this.tile = function () {

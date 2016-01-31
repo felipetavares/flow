@@ -1,9 +1,9 @@
 function SlidingDoor () {
+  DefaultObject.call(this);
+
   this.id = 'Objects.SlidingDoor';
 
   this.closed = true;
-
-  this.pos = new Vec.Vec2();
 
   this.move = function () {
   }

@@ -8,7 +8,7 @@ function serialize (o) {
   if (((typeof o === 'object') ||
       (typeof o === 'function')) && o != null) {
     for (var p in o) {
-      if (p == 'map')
+      if (p == 'map' || p == 'prototype')
         continue;
       if (o[p] === null) {
         of[p] = null;

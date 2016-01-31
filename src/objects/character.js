@@ -1,11 +1,9 @@
 function Character (characterId) {
+  DefaultObject.call(this);
+
   this.id = 'Objects.Character';
 
   this.characterId = characterId;
-
-  this.pos = new Vec.Vec2();
-
-  this.move = DefaultObject.move;
 
   this.tile = function () {
     return 'character';

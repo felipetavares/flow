@@ -117,13 +117,16 @@ socket.on('listening', function () {
 socket.on('close', function () {
   Log.heading('save');
   save(function () {
-    Log.heading('exit')
+    Log.heading('exit');
     process.exit();
   });
 });
 
 function save (done) {
   var data = Util.serialize(game.map);
+  // Pretty
+  //data = JSON.stringify(data, null, 2);
+  // Not pretty
   data = JSON.stringify(data);
 
   Fs.writeFile(mapFileName, data, function (error) {
