@@ -1,6 +1,3 @@
-var Fs = require('fs');
-var Crypto = require('crypto');
-
 var usersFileName = 'users.json';
 /* Number of bytes used for the session tokens */
 var tokenLength = 128;
@@ -228,3 +225,6 @@ module.exports = {
 }
 
 var Util = require('../util/lib.js');
+var Fs = require('fs');
+var Crypto = require('crypto');
+

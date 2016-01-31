@@ -1,8 +1,3 @@
-var Objects = require('../objects/lib.js');
-var Map = require('../map/lib.js');
-var Vec = require('../vec/lib.js');
-var Util = require('../util/lib.js');
-
 function Game () {
   this.character = new Array();
   this.map = new Map.Map();
@@ -43,3 +38,8 @@ function Game () {
 module.exports = {
     'Game': Game
 }
+
+var Objects = require('../objects/lib.js');
+var Map = require('../map/lib.js');
+var Vec = require('../vec/lib.js');
+var Util = require('../util/lib.js');

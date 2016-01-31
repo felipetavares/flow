@@ -1,5 +1,3 @@
-var Vec = require('../vec/lib.js');
-
 function Exec (pattern, fn) {
     this.pattern = pattern;
     this.fn = fn;
@@ -86,3 +84,5 @@ module.exports = {
     'Exec': Exec,
     'makeDirectionalCommand': makeDirectionalCommand
 }
+
+var Vec = require('../vec/lib.js');
