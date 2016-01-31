@@ -189,7 +189,9 @@ function init () {
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
       Log.heading('screen');
       var user = User.get(token);
-      Log.log('Name: '+user.name)
+      Log.log('Name: '+user.name);
+      Log.log('Width: '+input[1]);
+      Log.log('Height: '+input[2]);
 
       User.setScreen(token, game.map, new Vec.Vec2(input[1], input[2]));
     })]]));

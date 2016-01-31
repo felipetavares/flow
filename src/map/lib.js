@@ -120,6 +120,10 @@ function Map () {
     return view;
   }
 
+  this.getSize = function () {
+    return this.max.sub(this.min);
+  }
+
   this.render = function (view) {
     var size = this.max.sub(this.min);
     var tileset = new Tileset.Tileset();

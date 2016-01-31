@@ -163,7 +163,7 @@ exports.draw = function (login) {
       Buffer containing screen data
     */
     var viewData;
-    if (!view) {
+    if (!view || !view.size.eq(game.map.getSize())) {
       view = game.map.createView();
     }
 

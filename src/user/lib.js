@@ -185,6 +185,10 @@ function update (socket, game) {
       gameState.token = s;
       var retMsg = new Buffer(JSON.stringify(gameState));
 
+      if (chars[c]) {
+        console.log('Screen: '+chars[c].screen.str());
+      }
+
       socket.send(retMsg, 0, retMsg.length,
                   sessions[s].addr.port,
                   sessions[s].addr.address);
