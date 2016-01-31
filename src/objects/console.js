@@ -5,13 +5,34 @@ function Console () {
 
   this.pos = new Vec.Vec2();
 
+  this.connected = new Array();
+
+  this.connect = function (to, actionsMap) {
+    this.connected.push({
+      uniqueId: to,
+      action: actionsMap
+    });
+  }
+
+  this.activateConnected = function (action) {
+    // Enable all connected objects
+    for (var c in this.connected) {
+      var o = this.map.objects[this.connected[c].uniqueId];
+      o[this.connected[c].action[action]]();
+    }
+  }
+
   this.move = function () {
   }
   this.enable = function () {
     this.disabled = false;
+
+    this.activateConnected('enable');
   }
   this.disable = function () {
     this.disabled = true;
+
+    this.activateConnected('disable');
   }
 
   this.tile = function () {

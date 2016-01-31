@@ -4,7 +4,9 @@ function Map () {
   this.min = new Vec.Vec2(0, 0);
   this.max = new Vec.Vec2(0, 0);
 
-  this.objects = new Array();
+  this.maxObjectId = 0;
+
+  this.objects = new Object();
 
   this.graphicalTileset = null;
   this.terminalTileset = new Tileset.Tileset();
@@ -29,12 +31,17 @@ function Map () {
       this.max.y = o.pos.y+1;
   }
 
+  this.getNextId = function () {
+    return this.maxObjectId++;
+  }
+
   this.add = function (o) {
     this.pushBoundaries(o);
 
     o.map = this;
+    o.uniqueId = this.getNextId();
 
-    this.objects.push(o);
+    this.objects[o.uniqueId] = o;
   }
 
   // TODO: Maybe ensure that both the object position
