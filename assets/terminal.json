@@ -4,5 +4,24 @@
     "char": "@",
     "fg": "black",
     "bg": "white"
+  },
+  "concrete_wall": {
+    "char": "#",
+    "fg": "gray"
+  },
+  "sliding_door:closed": {
+    "char": "|",
+    "fg": "blue"
+  },
+  "sliding_door:open": {
+    "char": " "
+  },
+  "console:disabled": {
+    "char": "!",
+    "fg": "red"
+  },
+  "console:enabled": {
+    "char": "!",
+    "fg": "green"
   }
 }
