@@ -8,8 +8,9 @@ var Game = require('./game/lib.js');
 var Sudp = require('sudp');
 var Interface = require('./interface/lib.js');
 
-// Log information about the client before starting.
-
+/*
+  Log information about the client.
+*/
 if (process.argv.length > 2 &&
     process.argv[2] == '-v') {
     console.log('Flow Client');
@@ -21,22 +22,26 @@ var socket = Sudp.createSocket('udp6');
 var game = new Game.Game();
 
 socket.on('message', function (msg, remoteAddr) {
-    var state = JSON.parse(msg.toString());
+  var state = JSON.parse(msg.toString());
 
-    if (state.error) {
-      Interface.error(state.error);
-    } else {
-      game.loadState(state);
+  if (state.error) {
+    Interface.error(state.error);
+  } else {
+    var loginMessage = (game.token===null&&state.token)?true:false;
 
-      Interface.draw();
-    }
+    game.loadState(state);
+
+    Interface.draw(loginMessage);
+  }
 });
 
 function init () {
-  /* Starts the game blessed interface */
-  Interface.init(socket, game);
+  game.map.terminalTileset.load('./assets/terminal.json', function () {
+    /* Starts the game blessed interface */
+    Interface.init(socket, game);
 
-  socket.bind();
+    socket.bind();
+  });
 }
 
 init();

@@ -76,3 +76,32 @@ To better suit this new kind of interface, *nethack* (roguelike) inspired key-ba
 ## How we do it
 
 We will have to switch the terminal to a mode called [non-cannonical](http://www.gnu.org/software/libc/manual/html_node/Noncanonical-Input.html)
+
+## Library
+
+We will use the library [blessed](https://github.com/chjj/blessed)
+
+# Server interface
+
+The server interface must show the needed information clearly and consistently.
+
+Information must be logged both to a text file and to stdout. As such, it must be easily searchable.
+
+Player common commands must not be logged, as this would flood the log.
+
+## Mockup
+
+```
+Flow Server Version 0.1.0
+
+30/01/2016 18:02 | #start
+... startup log goes here
+30/01/2016 18:02 | #ready
+30/01/2016 18:05 | #login
+information about the login
+30/01/2016 17:05 | #login
+information about the login
+30/01/2016 17:06 | #register
+information about the login
+
+```

@@ -185,10 +185,22 @@ function update (socket, game) {
       gameState.token = s;
       var retMsg = new Buffer(JSON.stringify(gameState));
 
+      if (chars[c]) {
+        console.log('Screen: '+chars[c].screen.str());
+      }
+
       socket.send(retMsg, 0, retMsg.length,
                   sessions[s].addr.port,
                   sessions[s].addr.address);
     }
+  }
+}
+
+function setScreen (token, map, screen) {
+  var chars = characters(token, map);
+
+  for (var c in chars) {
+    chars[c].screen = screen;
   }
 }
 
@@ -204,11 +216,13 @@ module.exports = {
   'save': save,
   'add': add,
   'login': login,
+  'logout': logout,
   'createCharacterId': createCharacterId,
   'verify': verify,
   'logged': logged,
   'exists': exists,
   'characters': characters,
+  'setScreen': setScreen,
   'update': update,
   'get': get
 }

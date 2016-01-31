@@ -1,6 +1,8 @@
 var Vec = require('../vec/lib.js');
 var Packet = require('../packet/lib.js');
 var Objects = require('../objects/lib.js');
+var Tileset = require('./tileset.js');
+var View = require('./view.js');
 
 function Map () {
   this.id = 'Map.Map';
@@ -9,6 +11,9 @@ function Map () {
   this.max = new Vec.Vec2(0, 0);
 
   this.objects = new Array();
+
+  this.graphicalTileset = null;
+  this.terminalTileset = new Tileset.Tileset();
 
   this.characterFromId = function (id) {
     for (var o in this.objects) {
@@ -62,10 +67,10 @@ function Map () {
 
     position.assign(start.add(new Vec.Vec2(0.5, 0.5)));
 
-    while (!position.integer().eq(end.integer())) {
+    do {
       position.addeq(increment);
       positions.push(position.integer());
-    }
+    } while(!position.integer().eq(end.integer()));
 
     return positions;
   }
@@ -75,7 +80,7 @@ function Map () {
       // TODO: THIS WILL BE VERY SLOW!
       // TODO: Divide to conquest
       for (var o in this.objects) {
-        if (this.objects[o] !== object) {
+        if (this.objects[o] != object) {
           if (this.objects[o].pos.eq(positions[p]) &&
           this.collide(this.objects[o], object)) {
             return true;
@@ -91,51 +96,59 @@ function Map () {
     return true;
   }
 
-  this.queryCharacter = function (p) {
+  this.queryTile = function (p) {
     for (var o in this.objects) {
       if (this.objects[o].pos.eq(p)) {
-        return this.objects[o].character();
+        return this.objects[o].tile();
       }
     }
-    return '.';
+    return 'blank';
   }
 
-  this.draw = function () {
-    var size = this.max.sub(this.min);
-
-    for (var y=0;y<size.y;y++) {
-      var line = '';
-      for (var x=0;x<size.x;x++) {
-        line += this.queryCharacter(this.min.add(new Vec.Vec2(x, y)));
-      }
-      console.log(line);
+  this.getObjectsInView = function (start, size) {
+    var inView = [];
+    for (var o in this.objects) {
+      if (this.objects[o].pos.inside(start, start.add(size)))
+        inView.push(this.objects[o]);
     }
+    return inView;
   }
 
-  this.toString = function () {
-    var string = '';
+  this.createView = function () {
     var size = this.max.sub(this.min);
+    var view = new View.View(size);
+    return view;
+  }
 
-    for (var y=0;y<size.y;y++) {
-      var line = '';
-      for (var x=0;x<size.x;x++) {
-        line += this.queryCharacter(this.min.add(new Vec.Vec2(x, y)));
-      }
-      string += line+'\n';
+  this.getSize = function () {
+    return this.max.sub(this.min);
+  }
+
+  this.render = function (view) {
+    var size = this.max.sub(this.min);
+    var tileset = new Tileset.Tileset();
+
+    for (var o in this.objects) {
+      var p = this.objects[o].pos.sub(this.min);
+      view.set(p, tileset.code(this.objects[o].tile()));
     }
-
-    return string;
   }
 
   this.getState = function (player) {
     var state = new Packet.WorldState();
+    var viewSize = player.screen?player.screen:new Vec.Vec2(16, 8);
+    var inView = this.getObjectsInView(player.pos.sub(viewSize.div(2)),
+                                       viewSize);
 
-    for (var o in this.objects) {
-      state.objects.push(Util.serialize(this.objects[o]));
+    for (var o in inView) {
+      state.objects.push(Util.serialize(inView[o]));
     }
 
-    state.min = Util.serialize(this.min);
-    state.max = Util.serialize(this.max);
+    var min = player.pos.sub(viewSize.div(2));
+    var max = min.add(viewSize);
+
+    state.min = Util.serialize(min);
+    state.max = Util.serialize(max);
 
     return state;
   }
@@ -154,6 +167,8 @@ function Map () {
 
 module.exports = {
   'Map': Map,
+  'Tileset': Tileset,
+  'View': View
 };
 
 var Util = require('../util/lib.js');
