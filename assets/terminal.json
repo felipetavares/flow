@@ -1,4 +1,8 @@
 {
   "blank": " ",
-  "character": "@"
+  "character": {
+    "char": "@",
+    "fg": "black",
+    "bg": "white"
+  }
 }
