@@ -192,6 +192,14 @@ function update (socket, game) {
   }
 }
 
+function setScreen (token, map, screen) {
+  var chars = characters(token, map);
+
+  for (var c in chars) {
+    chars[c].screen = screen;
+  }
+}
+
 function get (token) {
   if (sessions[token])
     return sessions[token];
@@ -210,6 +218,7 @@ module.exports = {
   'logged': logged,
   'exists': exists,
   'characters': characters,
+  'setScreen': setScreen,
   'update': update,
   'get': get
 }

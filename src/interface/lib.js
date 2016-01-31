@@ -1,6 +1,7 @@
 var Blessed = require('blessed');
 var Crypto = require('crypto');
 var Packet = require('../packet/lib.js');
+var Vec = require('../vec/lib.js');
 
 /* The game */
 var game;
@@ -72,10 +73,10 @@ exports.init = function (_socket, _game) {
     tags: true
   });
   menu = Blessed.list({
-    top: '25%',
+    top: '50%-1',
     left: '25%',
     width: '50%',
-    height: '50%',
+    height: 3,
     style: {
         fg: 'white',
         bg: 'black',
@@ -134,12 +135,34 @@ exports.init = function (_socket, _game) {
   });
 }
 
-exports.draw = function () {
-  var string = game.map.toString();
+function render (view) {
+  var string = '';
+  var terminal = game.map.terminalTileset;
 
-  map.setContent(string);
 
-  screen.render();
+  for (var y=0;y<view.size.y;y++) {
+    for (var x=0;x<view.size.x;x++) {
+      string += terminal.character(view.at(new Vec.Vec2(x, y)));
+    }
+    string += '\n';
+  }
+
+  return string;
+}
+
+exports.draw = function (login) {
+  if (login) {
+    sendMsg(['screen', screen.width, screen.height], game.token, function () {
+      screen.append(map);
+      setkeys();
+    });
+  } else {
+    var view = game.map.render();
+
+    map.setContent(render(view));
+
+    screen.render();
+  }
 }
 
 exports.error = function (error) {
@@ -203,14 +226,12 @@ function login (cmd) {
       var password = Crypto.createHash('sha256')
                     .update(entrybox.getValue()).digest().toString();
 
-      sendMsg([cmd, user, password]);
-
-      if (cmd == 'login') {
-        screen.append(map);
-        setkeys();
-      } else {
-        mainMenu();
-      }
+      sendMsg([cmd, user, password], function () {
+        if (cmd == 'login') {
+        } else {
+          mainMenu();
+        }
+      });
 
       screen.render();
     });

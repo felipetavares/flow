@@ -10,6 +10,7 @@ var Packet = require('./packet/lib.js');
 var Test = require('./test/lib.js');
 var Package = require('../package.json')
 var Log = require('./log/lib.js');
+var Vec = require('./vec/lib.js');
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -86,15 +87,15 @@ socket.on('message', function (msg, remoteAddr) {
     if (user = User.get(action.token)) {
       Log.log('Token: valid');
       Log.log('User name: '+user.name);
+      game.execute(action.action, remoteAddr, action.token);
     } else {
       Log.log('Token: invalid');
     }
+  } else {
+    if (action.action.length == 3 &&
+        action.action[0] == 'login')
+      game.execute(action.action, remoteAddr, action.token);
   }
-
-  /* It's not a good idea to log the auth token */
-  //console.log('t '+action.token);
-
-  game.execute(action.action, remoteAddr, action.token);
 
   /* console.log to put up some space for the map */
   //console.log();
@@ -185,6 +186,14 @@ function init () {
       }
     }));
 
+    game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
+      Log.heading('screen');
+      var user = User.get(token);
+      Log.log('Name: '+user.name)
+
+      User.setScreen(token, game.map, new Vec.Vec2(input[1], input[2]));
+    })]]));
+
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
       Log.heading('login');
       Log.log('Name: '+input[1])
@@ -201,6 +210,13 @@ function init () {
                     addr.address);
         Log.log('Status: fail');
       } else {
+        var state = new Packet.WorldState();
+        state.token = token;
+        var retMsg = new Buffer(JSON.stringify(state));
+
+        socket.send(retMsg, 0, retMsg.length,
+                    addr.port,
+                    addr.address);
         Log.log('Status: success');
       }
     })]]));

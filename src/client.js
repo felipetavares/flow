@@ -22,22 +22,26 @@ var socket = Sudp.createSocket('udp6');
 var game = new Game.Game();
 
 socket.on('message', function (msg, remoteAddr) {
-    var state = JSON.parse(msg.toString());
+  var state = JSON.parse(msg.toString());
 
-    if (state.error) {
-      Interface.error(state.error);
-    } else {
-      game.loadState(state);
+  if (state.error) {
+    Interface.error(state.error);
+  } else {
+    var loginMessage = (game.token===null&&state.token)?true:false;
 
-      Interface.draw();
-    }
+    game.loadState(state);
+
+    Interface.draw(loginMessage);
+  }
 });
 
 function init () {
-  /* Starts the game blessed interface */
-  Interface.init(socket, game);
+  game.map.terminalTileset.load('./assets/terminal.json', function () {
+    /* Starts the game blessed interface */
+    Interface.init(socket, game);
 
-  socket.bind();
+    socket.bind();
+  });
 }
 
 init();

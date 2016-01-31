@@ -10,8 +10,8 @@ function Character (characterId) {
 
   this.move = DefaultObject.move;
 
-  this.character = function () {
-    return '@';
+  this.tile = function () {
+    return 'character';
   }
 }
 
