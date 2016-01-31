@@ -71,17 +71,9 @@ Will be represented using github issues.
 
 # Interface
 
-```
-#+#
-#@#
-###
+Check out `interface.md`.
 
-% go north
-```
-
-A detailed discussion of changes to make this interface better can be found at `interface.md`
-
-## The `go` command
+## The `go` command (server)
 
 The `go` command when called without arguments, makes the character move
 to the last direction he/she moved.
@@ -99,7 +91,9 @@ This direction can be:
 * `se`
 * `sw`
 
-Long forms of these directions (north, south, etc) are also supported.
+## The `go` command (client)
+
+The keypad numbers/`h`, `j`, `k`, and `l` can be used to move around.
 
 # Thank you
 
