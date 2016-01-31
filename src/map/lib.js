@@ -114,19 +114,20 @@ function Map () {
     return inView;
   }
 
-  this.render = function () {
+  this.createView = function () {
     var size = this.max.sub(this.min);
     var view = new View.View(size);
+    return view;
+  }
+
+  this.render = function (view) {
+    var size = this.max.sub(this.min);
     var tileset = new Tileset.Tileset();
 
-    for (var y=0;y<size.y;y++) {
-      for (var x=0;x<size.x;x++) {
-        var pos = this.min.add(new Vec.Vec2(x, y));
-        view.push(tileset.code(this.queryTile(pos)));
-      }
+    for (var o in this.objects) {
+      var p = this.objects[o].pos.sub(this.min);
+      view.set(p, tileset.code(this.objects[o].tile()));
     }
-
-    return view;
   }
 
   this.getState = function (player) {

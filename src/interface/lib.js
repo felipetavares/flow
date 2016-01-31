@@ -2,6 +2,7 @@ var Blessed = require('blessed');
 var Crypto = require('crypto');
 var Packet = require('../packet/lib.js');
 var Vec = require('../vec/lib.js');
+var Map = require('../map/lib.js');
 
 /* The game */
 var game;
@@ -15,6 +16,8 @@ var errorbox;
 var menu;
 /* Link to server */
 var socket;
+
+var view;
 
 exports.init = function (_socket, _game) {
   socket = _socket;
@@ -139,7 +142,6 @@ function render (view) {
   var string = '';
   var terminal = game.map.terminalTileset;
 
-
   for (var y=0;y<view.size.y;y++) {
     for (var x=0;x<view.size.x;x++) {
       string += terminal.character(view.at(new Vec.Vec2(x, y)));
@@ -157,9 +159,19 @@ exports.draw = function (login) {
       setkeys();
     });
   } else {
-    var view = game.map.render();
+    /*
+      Buffer containing screen data
+    */
+    var viewData;
+    if (!view) {
+      view = game.map.createView();
+    }
 
-    map.setContent(render(view));
+    viewData = new Map.View.View(view.size, view.content);
+
+    game.map.render(viewData);
+
+    map.setContent(render(viewData));
 
     screen.render();
   }
