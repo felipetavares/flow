@@ -39,7 +39,8 @@ exports.init = function (_socket, _game) {
     style: {
         fg: 'white',
         bg: 'black'
-    }
+    },
+    tags: true
   });
   entrybox = Blessed.textbox({
     top: '50%',
@@ -144,7 +145,8 @@ function render (view) {
 
   for (var y=0;y<view.size.y;y++) {
     for (var x=0;x<view.size.x;x++) {
-      string += terminal.character(view.at(new Vec.Vec2(x, y)));
+      var char = terminal.character(view.at(new Vec.Vec2(x, y)));
+      string += '{'+char.fg+'-fg}'+'{'+char.bg+'-bg}'+char.char+'{/'+char.fg+'-fg}'+'{/'+char.bg+'-bg}';
     }
     string += '\n';
   }

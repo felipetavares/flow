@@ -1,13 +1,27 @@
 var Fs = require('fs');
 
+var map = {
+  'blank': 0,
+  'character': 1
+};
+
+function Character (conf) {
+  this.fg = conf.fg===undefined?'white':conf.fg;
+  this.bg = conf.bg===undefined?'black':conf.bg;
+  this.char = conf.char===undefined?' ':conf.char;
+}
+
 function Tileset (graphical) {
   this.graphical = graphical===undefined?false:graphical;
-  /* map because any prop with the name 'map' isn't serialized */
-  this.map = {
-    'blank': 0,
-    'character': 1
-  };
   this.chartable = {};
+
+  this.interpret = function (value) {
+    if (typeof value === 'string') {
+      return new Character({'char': value});
+    } else {
+      return new Character(value);
+    }
+  }
 
   this.load = function (file, done) {
     var _this = this;
@@ -22,8 +36,10 @@ function Tileset (graphical) {
               Convert names to codes
             */
             for (var c in _this.chartable) {
-              _this.chartable[_this.code(c)] = _this.chartable[c];
+              var value = _this.chartable[c];
               delete _this.chartable[c];
+
+              _this.chartable[_this.code(c)] = _this.interpret(value);
             }
 
             done(true);
@@ -38,7 +54,7 @@ function Tileset (graphical) {
   }
 
   this.code = function (name) {
-    var fromMap = this.map[name];
+    var fromMap = map[name];
 
     if (fromMap) {
       return fromMap;
@@ -53,7 +69,7 @@ function Tileset (graphical) {
     if (fromTable) {
       return fromTable;
     } else {
-      return ' ';
+      return new Character();
     }
   }
 
@@ -66,4 +82,7 @@ function Tileset (graphical) {
   }
 }
 
-exports.Tileset = Tileset;
+module.exports = {
+  'Tileset': Tileset,
+  'Character': Character
+};
