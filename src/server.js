@@ -92,18 +92,13 @@ socket.on('message', function (msg, remoteAddr) {
       Log.log('Token: invalid');
     }
   } else {
+    // Only login & registe are allowed without an
+    // access token
     if (action.action.length == 3 &&
-        action.action[0] == 'login')
+        action.action[0] == 'login' ||
+        action.action[0] == 'register')
       game.execute(action.action, remoteAddr, action.token);
   }
-
-  /* console.log to put up some space for the map */
-  //console.log();
-
-  /* Server-side game visualization, how cool is that? */
-  //game.map.draw();
-
-  //console.log();
 
   /* Send game state to users */
   User.update(socket, game);
@@ -122,13 +117,16 @@ socket.on('listening', function () {
 socket.on('close', function () {
   Log.heading('save');
   save(function () {
-    Log.heading('exit')
+    Log.heading('exit');
     process.exit();
   });
 });
 
 function save (done) {
   var data = Util.serialize(game.map);
+  // Pretty
+  //data = JSON.stringify(data, null, 2);
+  // Not pretty
   data = JSON.stringify(data);
 
   Fs.writeFile(mapFileName, data, function (error) {
@@ -250,6 +248,8 @@ function init () {
 
         User.add(new User.User(input[1], input[2], cId, addr));
         game.add(new Objects.Character(cId));
+
+        game.execute(['login', input[1], input[2]], addr, token);
       }
     })]]));
 

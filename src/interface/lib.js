@@ -155,21 +155,23 @@ exports.draw = function (login) {
       setkeys();
     });
   } else {
-    /*
-      Buffer containing screen data
-    */
-    var viewData;
-    if (!view || !view.size.eq(game.map.getSize())) {
-      view = game.map.createView();
+    if (game.token) {
+      /*
+        Buffer containing screen data
+      */
+      var viewData;
+      if (!view || !view.size.eq(game.map.getSize())) {
+        view = game.map.createView();
+      }
+
+      viewData = new Map.View.View(view.size, view.content);
+
+      game.map.render(viewData);
+
+      map.setContent(render(viewData));
+
+      screen.render();
     }
-
-    viewData = new Map.View.View(view.size, view.content);
-
-    game.map.render(viewData);
-
-    map.setContent(render(viewData));
-
-    screen.render();
   }
 }
 

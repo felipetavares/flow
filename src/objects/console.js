@@ -1,17 +1,21 @@
 function Console () {
+  DefaultObject.call(this);
+
   this.id = 'Objects.Console';
 
   this.disabled = true;
-
-  this.pos = new Vec.Vec2();
 
   this.move = function () {
   }
   this.enable = function () {
     this.disabled = false;
+
+    this.activateConnected('enable');
   }
   this.disable = function () {
     this.disabled = true;
+
+    this.activateConnected('disable');
   }
 
   this.tile = function () {
