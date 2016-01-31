@@ -1,6 +1,3 @@
-var Vec = require('../vec/lib.js');
-var DefaultObject = require('./default.js');
-
 function SlidingDoor () {
   this.id = 'Objects.SlidingDoor';
 
@@ -25,3 +22,6 @@ function SlidingDoor () {
 module.exports = {
   'SlidingDoor': SlidingDoor
 }
+
+var Vec = require('../vec/lib.js');
+var DefaultObject = require('./default.js');

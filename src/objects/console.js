@@ -1,6 +1,3 @@
-var Vec = require('../vec/lib.js');
-var DefaultObject = require('./default.js');
-
 function Console () {
   this.id = 'Objects.Console';
 
@@ -25,3 +22,6 @@ function Console () {
 module.exports = {
   'Console': Console
 }
+
+var Vec = require('../vec/lib.js');
+var DefaultObject = require('./default.js');

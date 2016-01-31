@@ -1,6 +1,3 @@
-var Vec = require('../vec/lib.js');
-var DefaultObject = require('./default.js');
-
 function ConcreteWall () {
   this.id = 'Objects.ConcreteWall';
 
@@ -18,3 +15,6 @@ function ConcreteWall () {
 module.exports = {
   'ConcreteWall': ConcreteWall
 }
+
+var Vec = require('../vec/lib.js');
+var DefaultObject = require('./default.js');

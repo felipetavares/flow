@@ -1,6 +1,3 @@
-var Vec = require('../vec/lib.js');
-var DefaultObject = require('./default.js');
-
 function Character (characterId) {
   this.id = 'Objects.Character';
 
@@ -18,3 +15,6 @@ function Character (characterId) {
 module.exports = {
   'Character': Character
 }
+
+var Vec = require('../vec/lib.js');
+var DefaultObject = require('./default.js');

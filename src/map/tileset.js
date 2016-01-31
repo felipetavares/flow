@@ -1,10 +1,3 @@
-var Fs = require('fs');
-
-var map = {
-  'blank': 0,
-  'character': 1
-};
-
 function Character (conf) {
   this.fg = conf.fg===undefined?'white':conf.fg;
   this.bg = conf.bg===undefined?'black':conf.bg;
@@ -54,13 +47,10 @@ function Tileset (graphical) {
   }
 
   this.code = function (name) {
-    var fromMap = map[name];
-
-    if (fromMap) {
-      return fromMap;
-    } else {
+    if (name === 'blank')
       return 0;
-    }
+    else
+      return Util.hashCode(name);
   }
 
   this.character = function (code) {
@@ -86,3 +76,9 @@ module.exports = {
   'Tileset': Tileset,
   'Character': Character
 };
+
+/*
+  For hashing strings
+*/
+var Util = require('../util/lib.js');
+var Fs = require('fs');

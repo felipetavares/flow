@@ -1,9 +1,3 @@
-var Blessed = require('blessed');
-var Crypto = require('crypto');
-var Packet = require('../packet/lib.js');
-var Vec = require('../vec/lib.js');
-var Map = require('../map/lib.js');
-
 /* The game */
 var game;
 /* The screen */
@@ -258,3 +252,9 @@ function quit (code) {
   socket.close();
   process.exit(code===undefined?0:code);
 }
+
+var Blessed = require('blessed');
+var Crypto = require('crypto');
+var Packet = require('../packet/lib.js');
+var Vec = require('../vec/lib.js');
+var Map = require('../map/lib.js');

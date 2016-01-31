@@ -1,9 +1,3 @@
-var Vec = require('../vec/lib.js');
-var Packet = require('../packet/lib.js');
-var Objects = require('../objects/lib.js');
-var Tileset = require('./tileset.js');
-var View = require('./view.js');
-
 function Map () {
   this.id = 'Map.Map';
 
@@ -165,10 +159,17 @@ function Map () {
   }
 }
 
+
 module.exports = {
   'Map': Map,
-  'Tileset': Tileset,
-  'View': View
+  'Tileset': Tileset
 };
 
 var Util = require('../util/lib.js');
+var Vec = require('../vec/lib.js');
+var Packet = require('../packet/lib.js');
+var Objects = require('../objects/lib.js');
+var Tileset = require('./tileset.js');
+var View = require('./view.js');
+
+module.exports.View = View;
