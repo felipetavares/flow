@@ -1,6 +1,8 @@
 var Blessed = require('blessed');
 var Crypto = require('crypto');
 var Packet = require('../packet/lib.js');
+var Vec = require('../vec/lib.js');
+var Map = require('../map/lib.js');
 
 /* The game */
 var game;
@@ -14,6 +16,8 @@ var errorbox;
 var menu;
 /* Link to server */
 var socket;
+
+var view;
 
 exports.init = function (_socket, _game) {
   socket = _socket;
@@ -72,10 +76,10 @@ exports.init = function (_socket, _game) {
     tags: true
   });
   menu = Blessed.list({
-    top: '25%',
+    top: '50%-1',
     left: '25%',
     width: '50%',
-    height: '50%',
+    height: 3,
     style: {
         fg: 'white',
         bg: 'black',
@@ -105,54 +109,12 @@ exports.init = function (_socket, _game) {
   mainMenu();
 
   screen.render();
-}
-
-exports.draw = function () {
-  var string = game.map.toString();
-
-  map.setContent(string);
-
-  screen.render();
-}
-
-exports.error = function (error) {
-  screen.append(errorbox);
-
-  errorbox.setContent('{center}'+error+'{/center}');
-
-  mainMenu();
-
-  screen.remove(errorbox);
-}
-
-function sendMsg (data, token) {
-    var msg = new Buffer(JSON.stringify(new Packet.Action(data, token)));
-
-    socket.send(msg, 0, msg.length, 41322, '::1');
-}
-
-function mainMenu () {
-  screen.append(menu);
-
-  menu.pick(function (k, v) {
-    if (v == 'Login') {
-      login('login');
-    } else
-    if (v == 'Register') {
-      login('register');
-    }
-    if (v == 'Quit') {
-      quit();
-    }
-  });
-}
-
-function setkeys () {
-  map.focus();
 
   map.on('keypress', function (ch, key) {
     if (ch == 'q') {
-      quit();
+      sendMsg(['logout'], game.token, function () {
+        quit();
+      });
     }
 
     var dmap = {
@@ -174,6 +136,81 @@ function setkeys () {
      sendMsg(['go', dmap[ch]], game.token);
     }
   });
+}
+
+function render (view) {
+  var string = '';
+  var terminal = game.map.terminalTileset;
+
+  for (var y=0;y<view.size.y;y++) {
+    for (var x=0;x<view.size.x;x++) {
+      string += terminal.character(view.at(new Vec.Vec2(x, y)));
+    }
+    string += '\n';
+  }
+
+  return string;
+}
+
+exports.draw = function (login) {
+  if (login) {
+    sendMsg(['screen', screen.width, screen.height], game.token, function () {
+      screen.append(map);
+      setkeys();
+    });
+  } else {
+    /*
+      Buffer containing screen data
+    */
+    var viewData;
+    if (!view || !view.size.eq(game.map.getSize())) {
+      view = game.map.createView();
+    }
+
+    viewData = new Map.View.View(view.size, view.content);
+
+    game.map.render(viewData);
+
+    map.setContent(render(viewData));
+
+    screen.render();
+  }
+}
+
+exports.error = function (error) {
+  screen.append(errorbox);
+
+  errorbox.setContent('{center}'+error+'{/center}');
+
+  mainMenu();
+
+  screen.remove(errorbox);
+}
+
+function sendMsg (data, token, done) {
+    var msg = new Buffer(JSON.stringify(new Packet.Action(data, token)));
+
+    socket.send(msg, 0, msg.length, 41322, '::1', done);
+}
+
+function mainMenu () {
+  screen.append(menu);
+
+  menu.pick(function (k, v) {
+    if (v == 'Login') {
+      login('login');
+    } else
+    if (v == 'Register') {
+      login('register');
+    }
+    if (v == 'Quit') {
+      quit();
+    }
+  });
+}
+
+function setkeys () {
+  map.focus();
 }
 
 function login (cmd) {
@@ -201,14 +238,12 @@ function login (cmd) {
       var password = Crypto.createHash('sha256')
                     .update(entrybox.getValue()).digest().toString();
 
-      sendMsg([cmd, user, password]);
-
-      if (cmd == 'login') {
-        screen.append(map);
-        setkeys();
-      } else {
-        mainMenu();
-      }
+      sendMsg([cmd, user, password], function () {
+        if (cmd == 'login') {
+        } else {
+          mainMenu();
+        }
+      });
 
       screen.render();
     });

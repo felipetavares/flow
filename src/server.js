@@ -7,6 +7,10 @@ var Cmd = require('./cmd/lib.js');
 var Objects = require('./objects/lib.js');
 var User = require('./user/lib.js');
 var Packet = require('./packet/lib.js');
+var Test = require('./test/lib.js');
+var Package = require('../package.json')
+var Log = require('./log/lib.js');
+var Vec = require('./vec/lib.js');
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -18,6 +22,19 @@ var game = new Game.Game();
 */
 var defaultPort = 41322;
 var mapFileName = 'map.json';
+
+Log.log('Flow Server Version '+Package.version+'\n');
+Log.heading('start');
+
+/*
+  User -t to execute unit tests
+*/
+if (process.argv.length > 2 &&
+    process.argv[2] == '-t') {
+  Log.heading('test');
+  Test.test();
+  process.exit();
+}
 
 /* When the user types something */
 stdin.on('data', function(data) {
@@ -52,29 +69,41 @@ stdin.on('data', function(data) {
 });
 
 socket.on('error', function (error) {
-    console.log('error: \n'+error.stack);
+  Log.heading('error');
+  Log.log('Stack: \n'+error.stack);
 });
 
 /* When we receive an UDP packet */
 socket.on('message', function (msg, remoteAddr) {
-  console.log('> from '+remoteAddr.address);
-
   var action = JSON.parse(msg.toString());
 
-  console.log('a '+action.action);
+  Log.heading('action');
+  Log.log('Address: '+remoteAddr.address);
+  Log.log('Port: '+remoteAddr.port);
+  Log.log('Command: '+action.action[0]);
 
-  /* It's not a good idea to log the auth token */
-  //console.log('t '+action.token);
-
-  game.execute(action.action, remoteAddr, action.token);
+  if (action.token) {
+    var user;
+    if (user = User.get(action.token)) {
+      Log.log('Token: valid');
+      Log.log('User name: '+user.name);
+      game.execute(action.action, remoteAddr, action.token);
+    } else {
+      Log.log('Token: invalid');
+    }
+  } else {
+    if (action.action.length == 3 &&
+        action.action[0] == 'login')
+      game.execute(action.action, remoteAddr, action.token);
+  }
 
   /* console.log to put up some space for the map */
-  console.log();
+  //console.log();
 
   /* Server-side game visualization, how cool is that? */
-  game.map.draw();
+  //game.map.draw();
 
-  console.log();
+  //console.log();
 
   /* Send game state to users */
   User.update(socket, game);
@@ -82,14 +111,18 @@ socket.on('message', function (msg, remoteAddr) {
 
 /* When the server socket is created */
 socket.on('listening', function () {
-    var addr = socket.address();
+  var addr = socket.address();
 
-    console.log('listening at '+addr.address+':'+addr.port);
+  Log.heading('listen');
+  Log.log('Address: '+addr.address);
+  Log.log('Port: '+addr.port);
 });
 
 /* When the server socket is closed (dah) */
 socket.on('close', function () {
+  Log.heading('save');
   save(function () {
+    Log.heading('exit')
     process.exit();
   });
 });
@@ -108,6 +141,8 @@ function save (done) {
 }
 
 function load (done) {
+  Log.heading('load');
+
   Fs.exists(mapFileName, function (exists) {
     if (exists) {
       Fs.readFile(mapFileName, function (error, content) {
@@ -151,8 +186,19 @@ function init () {
       }
     }));
 
+    game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
+      Log.heading('screen');
+      var user = User.get(token);
+      Log.log('Name: '+user.name);
+      Log.log('Width: '+input[1]);
+      Log.log('Height: '+input[2]);
+
+      User.setScreen(token, game.map, new Vec.Vec2(input[1], input[2]));
+    })]]));
+
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
-      console.log('l '+input)
+      Log.heading('login');
+      Log.log('Name: '+input[1])
 
       var token = User.login(input[1], input[2], addr);
 
@@ -164,17 +210,43 @@ function init () {
         socket.send(retMsg, 0, retMsg.length,
                     addr.port,
                     addr.address);
+        Log.log('Status: fail');
+      } else {
+        var state = new Packet.WorldState();
+        state.token = token;
+        var retMsg = new Buffer(JSON.stringify(state));
+
+        socket.send(retMsg, 0, retMsg.length,
+                    addr.port,
+                    addr.address);
+        Log.log('Status: success');
+      }
+    })]]));
+
+    game.addCmd(new Cmd.Cmd(1, [[new Cmd.Exec('logout', function (addr, token, input) {
+      Log.heading('logout');
+
+      var user;
+      if (user = User.get(token)) {
+        var result = User.logout(user.name);
+
+        if (!result) {
+          Log.log('Status: fail');
+        } else {
+          Log.log('Status: success');
+        }
       }
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('register', function (addr, token, input) {
-      console.log ('r '+input);
+      Log.heading('register');
+      Log.log ('Name: '+input[1]);
 
       if (!User.exists(input[1])) {
         var cId = User.createCharacterId();
 
-        console.log ('creating character for newly created user');
-        console.log ('cid is '+cId);
+        Log.log ('Creating character for user');
+        Log.log ('CID is '+cId);
 
         User.add(new User.User(input[1], input[2], cId, addr));
         game.add(new Objects.Character(cId));

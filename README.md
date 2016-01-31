@@ -26,3 +26,15 @@ To run the server:
 client:
 
     flow-client
+
+# Unit Tests
+
+If you wish to run the tests, type
+
+    flow-server -t
+
+## Writing tests
+
+Create a file in `src/test` and add a `loadTest` statement to `src/test/lib.js`.
+
+Follow the structure from `src/test/vec2.js`.
