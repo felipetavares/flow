@@ -182,7 +182,7 @@ function init () {
       if (character) {
         character.move(direction);
       }
-    }));
+    }, Cmd.serverSideDirections));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
       Log.heading('screen');
