@@ -2,6 +2,8 @@
 var game;
 /* The screen */
 var screen;
+/* Keys input */
+var compositor;
 /* Area to draw the map */
 var map;
 var entrybox;
@@ -14,6 +16,7 @@ var socket;
 var view;
 
 exports.init = function (_socket, _game) {
+  compositor = new Compositor.Compositor();
   socket = _socket;
   game = _game;
 
@@ -105,6 +108,10 @@ exports.init = function (_socket, _game) {
 
   screen.render();
 
+  compositor.on(compositor.directional(function (d) {
+    sendMsg(['go', d.x, d.y], game.token);
+  }));
+
   map.on('keypress', function (ch, key) {
     if (ch == 'q') {
       sendMsg(['logout'], game.token, function () {
@@ -112,24 +119,7 @@ exports.init = function (_socket, _game) {
       });
     }
 
-    var dmap = {
-      'l': 'e',
-      '6': 'e',
-      'h': 'w',
-      '4': 'w',
-      'k': 'n',
-      '8': 'n',
-      'j': 's',
-      '2': 's',
-      '7': 'nw',
-      '9': 'ne',
-      '1': 'sw',
-      '3': 'se'
-    };
-
-    if (dmap[ch]) {
-     sendMsg(['go', dmap[ch]], game.token);
-    }
+    compositor.insert(ch, key);
   });
 }
 
@@ -272,3 +262,4 @@ var Crypto = require('crypto');
 var Packet = require('../packet/lib.js');
 var Vec = require('../vec/lib.js');
 var Map = require('../map/lib.js');
+var Compositor = require('./compositor.js');
