@@ -48,6 +48,8 @@ function Compositor () {
           // But I'm smart, ya bad person!
           this.composition = keymap[k];
         }
+
+        break;
       }
     }
   }
@@ -68,7 +70,12 @@ function Compositor () {
     var dirFunctions = {};
 
     for (var d in this.directions) {
-      dirFunctions[d] = fn(this.directions[d]);
+      var _this = this;
+      dirFunctions[d] = (function (p) {
+        return function () {
+          fn(_this.directions[p]);
+        }
+      })(d);
     }
 
     return dirFunctions;

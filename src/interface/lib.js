@@ -119,7 +119,7 @@ exports.init = function (_socket, _game) {
       });
     }
 
-    compositor.input(ch, key);
+    compositor.insert(ch, key);
   });
 }
 
