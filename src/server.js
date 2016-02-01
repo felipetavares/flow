@@ -182,7 +182,7 @@ function init () {
       if (character) {
         character.move(new Vec.Vec2(input[1], input[2]));
       }
-    }]]));
+    })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
       Log.heading('screen');
