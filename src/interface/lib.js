@@ -1,93 +1,44 @@
 /* The game */
 var game;
-/* The screen */
-var screen;
-/* Keys input */
+/* Keys/messages input */
 var compositor;
-/* Area to draw the map */
-var map;
-var entrybox;
-var entrytitle;
-var errorbox;
-var menu;
 /* Link to server */
 var socket;
 
 var view;
 
 exports.init = function (_socket, _game) {
+  /*
+    Setup module variables
+  */
   compositor = new Compositor.Compositor();
   socket = _socket;
   game = _game;
 
-  screen = Blessed.screen({
-    style: {
-      fg: 'red',
-      bg: 'green'
-    },
-    smartCSR: true
-  });
+  var currentScreen = {};
 
-  map = Blessed.box({
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    style: {
-        fg: 'white',
-        bg: 'black'
-    },
-    tags: true
-  });
-  entrybox = Blessed.textbox({
-    top: '50%',
-    left: '25%',
-    width: '50%',
-    height: 1,
-    style: {
-        fg: 'black',
-        bg: 'white'
-    },
-    censor: false,
-    secret: false
-  });
-  entrytitle = Blessed.box({
-    top: '50%-1',
-    left: '25%',
-    width: '50%',
-    height: 1,
-    style: {
-        fg: 'white',
-        bg: 'black'
-    },
-    tags: true
-  });
-  errorbox = Blessed.box({
-    top: 0,
-    left: '25%',
-    width: '50%',
-    height: 1,
-    style: {
-        fg: 'red',
-        bg: 'black'
-    },
-    tags: true
-  });
-  menu = Blessed.list({
-    top: '50%-1',
-    left: '25%',
-    width: '50%',
-    height: 3,
-    style: {
-        fg: 'white',
-        bg: 'black',
-        selected: {
-          fg: 'black',
-          bg: 'white'
-        }
-    },
-    tags: true,
-    keys: true
+  /*
+    Makes stdin do not wait for entire lines
+  */
+  //process.stdin.setRawMode(true);
+
+  /*
+    Send character to the compositor as soon as
+    it arrives
+  */
+  // process.stdin.on('readable', function () {
+  //   var buffer = process.stdin.read();
+
+  //   if (buffer) {
+  //     compositor.insert('k:'+buffer.toString(), buffer);
+  //   }
+  // });
+
+  Terminal.terminal.grabInput(true);
+  Terminal.terminal.fullscreen();
+
+  Terminal.terminal.on('key', function (key, matches, data) {
+    compositor.insert('k:'+key, key);
   });
 
   /*
@@ -96,158 +47,223 @@ exports.init = function (_socket, _game) {
     more interesting to the user than the app's
     name.
   */
-  screen.title = 'Flow Client';
 
-  menu.setItems([
-    'Login',
-    'Register',
-    'Quit'
-  ]);
+  /*
+    Decide what to do with input characters
+    and input messages / timers
 
-  mainMenu();
+    without any prefix -> global state
 
-  screen.render();
-
-  compositor.on(compositor.directional(function (d) {
-    sendMsg(['go', d.x, d.y], game.token);
-  }));
-
-  map.on('keypress', function (ch, key) {
-    if (ch == 'q') {
-      sendMsg(['logout'], game.token, function () {
-        quit();
-      });
-    }
-
-    compositor.insert(ch, key);
-  });
-}
-
-function render (view) {
-  var string = '';
-  var terminal = game.map.terminalTileset;
-
-  for (var y=0;y<view.size.y;y++) {
-    for (var x=0;x<view.size.x;x++) {
-      var char = terminal.character(view.at(new Vec.Vec2(x, y)));
-      string += '{'+char.fg+'-fg}'+'{'+char.bg+'-bg}'+char.char+'{/'+char.fg+'-fg}'+'{/'+char.bg+'-bg}';
-    }
-    string += '\n';
-  }
-
-  return string;
-}
-
-exports.draw = function (login) {
-  if (login) {
-    sendMsg(['screen', screen.width, screen.height], game.token, function () {
-      screen.append(map);
-      setkeys();
-    });
-  } else {
-    if (game.token) {
-      /*
-        Buffer containing screen data
-      */
-      var viewData;
-      if (!view || !view.size.eq(game.map.getSize())) {
-        view = game.map.createView();
-      }
-
-      viewData = new Map.View.View(view.size, view.content);
-
-      game.map.render(viewData);
-
-      map.setContent(render(viewData));
-
-      screen.render();
-    }
-  }
-}
-
-exports.error = function (error) {
-  screen.append(errorbox);
-
-  errorbox.setContent('{center}'+error+'{/center}');
-
-  mainMenu();
-
-  screen.remove(errorbox);
-}
-
-function sendMsg (data, token, done) {
-    var msg = new Buffer(JSON.stringify(new Packet.Action(data, token)));
-
-    socket.send(msg, 0, msg.length, 41322, '::1', done);
-}
-
-function mainMenu () {
-  screen.append(menu);
-
-  menu.pick(function (k, v) {
-    if (v == 'Login') {
-      login('login');
-    } else
-    if (v == 'Register') {
-      login('register');
-    }
-    if (v == 'Quit') {
-      quit();
-    }
-  });
-}
-
-function setkeys () {
-  map.focus();
-}
-
-function login (cmd) {
-  screen.append(entrytitle);
-  screen.append(entrybox);
-
-  entrytitle.setContent("{center}Username{/center}");
-  entrybox.censor = false;
-  entrybox.clearValue();
-
-  entrybox.readInput(function () {
-    var user = entrybox.getValue();
-
-    entrybox.censor = true;
-    entrybox.clearValue();
-
-    entrytitle.setContent('{center}Password{/center}');
-
-    screen.render();
-
-    entrybox.readInput(function () {
-      screen.remove(entrybox);
-      screen.remove(entrytitle);
-
-      var password = Crypto.createHash('sha256')
-                    .update(entrybox.getValue()).digest().toString();
-
-      sendMsg([cmd, user, password], function () {
-        if (cmd == 'login') {
+    t: -> timer
+    k: -> key
+    m: -> server message
+  */
+  compositor.on({
+    'wait': {
+      'm:login': function (state, msg) {
+        if (msg.error) {
+          return true;
         } else {
-          mainMenu();
+          server(['screen', Terminal.terminal.width, Terminal.terminal.height], function () {
+            setTimeout(function () {
+              compositor.insert('t:out');
+            }, 1000);
+          });
         }
-      });
-
-      screen.render();
-    });
+      },
+      'm:screen': function (state, msg) {
+        game.loadState(msg);
+        compositor.goTo(['game']);
+      },
+      't:out': function () {
+        return true;
+      }
+    },
+    'game': compositor.directional(function (d) {
+      server(['go', d.x, d.y]);
+    }),
+    'login': {
+      // Everything is handled in the 'change' events
+    },
+    'register': {
+      'k:q': function () {
+        return true;
+      },
+      'k:any': function (character) {
+        // Do something
+      }
+    }
   });
 
-  screen.render();
+  compositor.on({
+    'k:q': function () {
+      quit();
+    },
+    'k:l': function () {
+      game.token = null;
+      compositor.goTo(['login']);
+    },
+    'k:r': function () {
+      compositor.goTo(['register']);
+    },
+    'game': {
+      'k:q': function () {
+        server(['logout'], function () {
+          compositor.goTo([]);
+        });
+      },
+      'm:update': function (state, msg) {
+        game.loadState(msg);
+
+        var colors = {
+          'black': 0,
+          'red': 1,
+          'green': 2,
+          'yellow': 3,
+          'blue': 4,
+          'magneta': 5,
+          'cyan': 6,
+          'white': 7
+        };
+
+        for (var u in game.map.updatedPositions) {
+          var pos = game.map.updatedPositions[u];
+          var tileset = game.map.terminalTileset;
+
+          var char = tileset.character(tileset.code(game.map.queryTile(pos)));
+
+          var screenPos = pos.sub(game.map.min).add(new Vec.Vec2(1, 1));
+
+          Terminal.terminal.moveTo(screenPos.x, screenPos.y);
+          Terminal.terminal.color(colors[char.fg]);
+          Terminal.terminal.bgColor(colors[char.bg]);
+          Terminal.terminal(char.char);
+        }
+      }
+    }
+  });
+
+  /*
+    Execute after each state change
+
+    global is special here
+  */
+  compositor.change({
+    'global': function (make) {
+      Terminal.terminal.hideCursor(false);
+
+      if (make) {
+        var menu = ['[L]ogin', '[R]egister', '[Q]uit'];
+
+        Terminal.terminal.clear();
+        Terminal.terminal.singleLineMenu(menu, function (error, input) {
+          switch (input.selectedIndex) {
+            case 0:
+              compositor.goTo(['k:l']);
+            break;
+            case 1:
+              compositor.goTo(['k:r']);
+            break;
+            case 2:
+              compositor.goTo(['k:q']);
+            break;
+          }
+        });
+      }
+    },
+    'game': function (make) {
+      if (make) {
+        Terminal.terminal.color(7);
+        Terminal.terminal.bgColor(0);
+        Terminal.terminal.clear();
+        Terminal.terminal.hideCursor(true);
+      }
+    },
+    'login': function (make) {
+      /*
+        Creates the screen
+      */
+      if (make) {
+        var username;
+        var password;
+
+        Terminal.terminal.clear();
+        Terminal.terminal('Username: ');
+        Terminal.terminal.inputField({}, function (error, input) {
+          Terminal.terminal('\n');
+          username = input;
+
+          Terminal.terminal('Password: ');
+          Terminal.terminal.inputField({echo: false}, function (error, input) {
+            Terminal.terminal('\n');
+            password = input;
+
+            server(['login', username, encrypt(password)], function () {
+              compositor.goTo(['wait']);
+              setTimeout(function () {
+                compositor.insert('t:out');
+              }, 1000);
+            });
+          });
+        });
+      }
+    },
+    'register': function (make) {
+      if (make) {
+        var username;
+        var password;
+
+        Terminal.terminal.clear();
+        Terminal.terminal('Username: ');
+        Terminal.terminal.inputField({}, function (error, input) {
+          Terminal.terminal('\n');
+          username = input;
+
+          Terminal.terminal('Password: ');
+          Terminal.terminal.inputField({echo: false}, function (error, input) {
+            Terminal.terminal('\n');
+            password = input;
+
+            server(['register', username, encrypt(password)], function () {
+              compositor.goTo([]);
+            });
+          });
+        });
+      }
+    }
+  })
+}
+
+exports.message = function (msg) {
+  if (!game.token && msg.token)
+    game.token = msg.token;
+
+  compositor.insert('m:'+msg.action[0], msg);
+}
+
+function server (data, done) {
+  var msg = new Buffer(JSON.stringify(new Packet.Action(data, game.token)));
+
+  socket.send(msg, 0, msg.length, 41322, '::1', done);
 }
 
 function quit (code) {
+  Terminal.terminal.color(7);
+  Terminal.terminal.bgColor(0);
+  Terminal.terminal.clear();
+  Terminal.terminal.grabInput(false);
+  Terminal.terminal.hideCursor(false);
   socket.close();
   process.exit(code===undefined?0:code);
 }
 
-var Blessed = require('blessed');
+function encrypt (password) {
+  return Crypto.createHash('sha256').update(password).digest().toString();
+}
+
 var Crypto = require('crypto');
 var Packet = require('../packet/lib.js');
 var Vec = require('../vec/lib.js');
 var Map = require('../map/lib.js');
 var Compositor = require('./compositor.js');
+var Terminal = require('terminal-kit');

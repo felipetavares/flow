@@ -31,7 +31,6 @@ function Game () {
 
   this.loadState = function (state) {
     this.map.loadState(state);
-    this.token = state.token;
   }
 }
 

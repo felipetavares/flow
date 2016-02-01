@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "sudp": ">=0.1.0",
-    "blessed": ">=0.1.81"
+    "terminal-kit": "*"
   },
   "bin": {
     "flow-client": "src/client.js",

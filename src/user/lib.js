@@ -179,7 +179,7 @@ function update (socket, game) {
 
     for (var c in chars) {
       var gameState = game.getState(chars[c]);
-      gameState.token = s;
+      gameState.action = ['update'];
       var retMsg = new Buffer(JSON.stringify(gameState));
 
       socket.send(retMsg, 0, retMsg.length,

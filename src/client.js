@@ -25,16 +25,11 @@ function init () {
     if (state.error) {
       Interface.error(state.error);
     } else {
-      var loginMessage = (game.token===null&&state.token)?true:false;
-
-      game.loadState(state);
-
-      Interface.draw(loginMessage);
+      Interface.message(state);
     }
   });
 
   game.map.terminalTileset.load('./assets/terminal.json', function () {
-    /* Starts the game blessed interface */
     Interface.init(socket, game);
 
     socket.bind();
