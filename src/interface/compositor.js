@@ -68,7 +68,7 @@ function Compositor () {
     var dirFunctions = {};
 
     for (var d in directions) {
-      dirFunctions[d] = fn(directions[d]);
+      dirFunctions[d] = fn(this.directions[d]);
     }
 
     return dirFunctions;
