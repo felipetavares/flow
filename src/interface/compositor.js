@@ -4,6 +4,17 @@ function Compositor () {
   // Store keypresses to form a composed
   // keypress here
   this.composition = null;
+  // Directions for keys
+  this.directions = {
+    'k': new Vec.Vec2(0, -1),
+    'l': new Vec.Vec2(1, 0),
+    'j': new Vec.Vec2(0, 1),
+    'h': new Vec.Vec2(-1, 0)
+    //new Vec.Vec2(-1, -1),
+    //new Vec.Vec2(1, -1),
+    //new Vec.Vec2(1, 1),
+    // new Vec.Vec2(-1, 1)
+  };
 
   // Merges a new key combination into
   // this.keys
@@ -37,6 +48,8 @@ function Compositor () {
           // But I'm smart, ya bad person!
           this.composition = keymap[k];
         }
+
+        break;
       }
     }
   }
@@ -52,6 +65,23 @@ function Compositor () {
       this.checkInKeymap(this.keys, char);
     }
   }
+
+  this.directional = function (fn) {
+    var dirFunctions = {};
+
+    for (var d in this.directions) {
+      var _this = this;
+      dirFunctions[d] = (function (p) {
+        return function () {
+          fn(_this.directions[p]);
+        }
+      })(d);
+    }
+
+    return dirFunctions;
+  }
 }
 
 exports.Compositor = Compositor;
+
+var Vec = require('../vec/lib.js');
