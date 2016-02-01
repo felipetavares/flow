@@ -115,8 +115,10 @@ function Map () {
     return inView;
   }
 
-  this.createView = function () {
-    var size = this.max.sub(this.min);
+  this.createView = function (size) {
+    if (size === undefined) {
+      size = this.max.sub(this.min);
+    }
     var view = new View.View(size);
     return view;
   }

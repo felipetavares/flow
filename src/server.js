@@ -192,6 +192,15 @@ function init () {
       Log.log('Height: '+input[2]);
 
       User.setScreen(token, game.map, new Vec.Vec2(input[1], input[2]));
+
+      var state = new Packet.WorldState();
+      state.token = token;
+      state.action= input;
+      var retMsg = new Buffer(JSON.stringify(state));
+
+      socket.send(retMsg, 0, retMsg.length,
+                  addr.port,
+                  addr.address);
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
@@ -203,6 +212,7 @@ function init () {
       if (!token) {
         var state = new Packet.WorldState();
         state.error = 'Invalid login.';
+        state.action = input;
         var retMsg = new Buffer(JSON.stringify(state));
 
         socket.send(retMsg, 0, retMsg.length,
@@ -212,6 +222,7 @@ function init () {
       } else {
         var state = new Packet.WorldState();
         state.token = token;
+        state.action= input;
         var retMsg = new Buffer(JSON.stringify(state));
 
         socket.send(retMsg, 0, retMsg.length,

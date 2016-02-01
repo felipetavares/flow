@@ -4,7 +4,8 @@ function Action (action, token) {
 }
 
 function WorldState (token) {
-  this.token = token===undefined?'':token;
+  if (token !== undefined)
+    this.token = token;
   this.objects = [];
   this.error = false;
 }
