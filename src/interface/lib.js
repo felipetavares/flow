@@ -115,19 +115,6 @@ exports.init = function (_socket, _game) {
       'm:update': function (state, msg) {
         game.loadState(msg);
 
-        var termSize = new Vec.Vec2(Terminal.terminal.width, Terminal.terminal.height);
-
-        if (!view || !view.size.eq(termSize)) {
-          Terminal.terminal.hideCursor(true);
-          view = game.map.createView(termSize);
-        }
-
-        var sparseView = new Map.View.View (view.size, view.content);
-
-        game.map.render(sparseView);
-
-        Terminal.terminal.moveTo(1, 1);
-
         var colors = {
           'black': 0,
           'red': 1,
@@ -139,14 +126,18 @@ exports.init = function (_socket, _game) {
           'white': 7
         };
 
-        for (var y=0;y<sparseView.size.y;y++) {
-          for (var x=0;x<sparseView.size.x;x++) {
-            var char = game.map.terminalTileset.character(sparseView.at(new Vec.Vec2(x, y)));
+        for (var u in game.map.updatedPositions) {
+          var pos = game.map.updatedPositions[u];
+          var tileset = game.map.terminalTileset;
 
-            Terminal.terminal.color(colors[char.fg]);
-            Terminal.terminal.bgColor(colors[char.bg]);
-            Terminal.terminal(char.char);
-          }
+          var char = tileset.character(tileset.code(game.map.queryTile(pos)));
+
+          var screenPos = pos.sub(game.map.min).add(new Vec.Vec2(1, 1));
+
+          Terminal.terminal.moveTo(screenPos.x, screenPos.y);
+          Terminal.terminal.color(colors[char.fg]);
+          Terminal.terminal.bgColor(colors[char.bg]);
+          Terminal.terminal(char.char);
         }
       }
     }
@@ -181,6 +172,12 @@ exports.init = function (_socket, _game) {
       }
     },
     'game': function (make) {
+      if (make) {
+        Terminal.terminal.color(7);
+        Terminal.terminal.bgColor(0);
+        Terminal.terminal.clear();
+        Terminal.terminal.hideCursor(true);
+      }
     },
     'login': function (make) {
       /*
@@ -251,6 +248,8 @@ function server (data, done) {
 }
 
 function quit (code) {
+  Terminal.terminal.color(7);
+  Terminal.terminal.bgColor(0);
   Terminal.terminal.clear();
   Terminal.terminal.grabInput(false);
   Terminal.terminal.hideCursor(false);

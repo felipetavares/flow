@@ -8,6 +8,8 @@ function Map () {
 
   this.objects = new Object();
 
+  this.updatedPositions = new Array();
+
   this.graphicalTileset = null;
   this.terminalTileset = new Tileset.Tileset();
 
@@ -115,26 +117,8 @@ function Map () {
     return inView;
   }
 
-  this.createView = function (size) {
-    if (size === undefined) {
-      size = this.max.sub(this.min);
-    }
-    var view = new View.View(size);
-    return view;
-  }
-
   this.getSize = function () {
     return this.max.sub(this.min);
-  }
-
-  this.render = function (view) {
-    var size = this.max.sub(this.min);
-    var tileset = new Tileset.Tileset();
-
-    for (var o in this.objects) {
-      var p = this.objects[o].pos.sub(this.min);
-      view.set(p, tileset.code(this.objects[o].tile()));
-    }
   }
 
   this.getState = function (player) {
@@ -157,17 +141,29 @@ function Map () {
   }
 
   this.loadState = function (state) {
-    this.min = Util.unserialize(state.min);
-    this.max = Util.unserialize(state.max);
+    min = Util.unserialize(state.min);
+    max = Util.unserialize(state.max);
+    this.updatedPositions = new Array();
 
+    // Updated the old positions of the objects
+    for (var o in this.objects) {
+      this.updatedPositions.push(this.objects[o].pos.sub(this.min.sub(min)));
+    }
+
+    this.min = min;
+    this.max = max;
     this.objects = new Array();
 
     for (var o in state.objects) {
       this.add(Util.unserialize(state.objects[o]));
     }
+
+    // And the new ones
+    for (var o in this.objects) {
+      this.updatedPositions.push(this.objects[o].pos);
+    }
   }
 }
-
 
 module.exports = {
   'Map': Map,
@@ -179,6 +175,3 @@ var Vec = require('../vec/lib.js');
 var Packet = require('../packet/lib.js');
 var Objects = require('../objects/lib.js');
 var Tileset = require('./tileset.js');
-var View = require('./view.js');
-
-module.exports.View = View;
