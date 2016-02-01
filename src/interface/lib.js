@@ -137,10 +137,22 @@ function render (view) {
   var string = '';
   var terminal = game.map.terminalTileset;
 
+  var color = {
+    'black': 0,
+    'red': 1,
+    'green': 2,
+    'yellow': 3,
+    'blue': 4,
+    'magenta': 5,
+    'cyan': 6,
+    'white': 7,
+    'gray': 7
+  };
+
   for (var y=0;y<view.size.y;y++) {
     for (var x=0;x<view.size.x;x++) {
       var char = terminal.character(view.at(new Vec.Vec2(x, y)));
-      string += '{'+char.fg+'-fg}'+'{'+char.bg+'-bg}'+char.char+'{/'+char.fg+'-fg}'+'{/'+char.bg+'-bg}';
+      string += '\x1b[3'+color[char.fg]+'m'+char.char;
     }
     string += '\n';
   }
@@ -168,7 +180,7 @@ exports.draw = function (login) {
 
       game.map.render(viewData);
 
-      map.setContent(render(viewData));
+      map._pcontent = render(viewData);
 
       screen.render();
     }
