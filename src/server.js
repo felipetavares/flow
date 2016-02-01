@@ -176,13 +176,13 @@ function init () {
   /* Loads map */
   load(function () {
     /* Creates commands */
-    game.addCmd(Cmd.makeDirectionalCommand('go', function (direction, addr, token) {
+    game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('go', function (addr, token, input) {
       var character = User.characters(token, game.map)[0];
 
       if (character) {
-        character.move(direction);
+        character.move(new Vec.Vec2(input[1], input[2]));
       }
-    }, Cmd.serverSideDirections));
+    }]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('screen', function (addr, token, input) {
       Log.heading('screen');

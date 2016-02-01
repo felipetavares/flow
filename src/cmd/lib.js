@@ -51,41 +51,9 @@ function Cmd (number, args){
     }
 }
 
-var serverSideDirections = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
-
-function makeDirectionalCommand (cmd, fn, directions) {
-    return new Cmd(2, [cmd, [
-	new Exec(directions[0], function (addr, token) {
-	    fn(new Vec.Vec2(0, -1), addr, token);
-	}),
-	new Exec(directions[1], function (addr, token) {
-	    fn(new Vec.Vec2(0, 1), addr, token);
-	}),
-	new Exec(directions[2], function (addr, token) {
-	    fn(new Vec.Vec2(1, 0), addr, token);
-	}),
-	new Exec(directions[3], function (addr, token) {
-	    fn(new Vec.Vec2(-1, 0), addr, token);
-	}),
-	new Exec(directions[4], function (addr, token) {
-	    fn(new Vec.Vec2(1, -1), addr, token);
-	}),
-	new Exec(directions[5], function (addr, token) {
-	    fn(new Vec.Vec2(-1, -1), addr, token);
-	}),
-	new Exec(directions[6], function (addr, token) {
-	    fn(new Vec.Vec2(1, 1), addr, token);
-	}),
-	new Exec(directions[7], function (addr, token) {
-	    fn(new Vec.Vec2(-1, 1), addr, token);
-	})]]);
-}
-
 module.exports = {
-    'Cmd': Cmd,
-    'Exec': Exec,
-    'makeDirectionalCommand': makeDirectionalCommand,
-    'serverSideDirections': serverSideDirections
+  'Cmd': Cmd,
+  'Exec': Exec
 }
 
 var Vec = require('../vec/lib.js');
