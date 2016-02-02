@@ -1,6 +1,7 @@
-function Segment (pos, len) {
+function Segment (pos, len, text) {
   this.pos = pos;
   this.len = len;
+  this.text = text;
 }
 
 function Ui () {
@@ -11,7 +12,7 @@ function Ui () {
   this.printSegment = function (segment, pos) {
     pos = pos.add(this.offset);
 
-    this.dirtySegments.push(new Segment(pos, segment.length));
+    this.dirtySegments.push(new Segment(pos, segment.length, segment));
 
     Terminal.terminal.color(7);
     Terminal.terminal.bgColor(0);
@@ -19,6 +20,17 @@ function Ui () {
     Terminal.terminal(segment);
 
     this.offset.y = pos.y;
+  }
+
+  this.draw = function () {
+    for (var d in this.dirtySegments) {
+      var segment = this.dirtySegments[d];
+
+      Terminal.terminal.color(7);
+      Terminal.terminal.bgColor(0);
+      Terminal.terminal.moveTo(segment.pos.x, segment.pos.y);
+      Terminal.terminal(segment.text);
+    }
   }
 
   // Tell where to clear

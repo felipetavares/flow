@@ -1,12 +1,13 @@
 function Character (characterId) {
   DefaultObject.call(this);
+  this.z = 1;
 
   this.id = 'Objects.Character';
 
   this.characterId = characterId;
 
   this.access = function (character, user) {
-    this.map.message(new Packet.Message('Hello user!', user));
+    this.map.message(new Packet.Message('Hello '+user.name, user));
   }
 
   this.tile = function () {

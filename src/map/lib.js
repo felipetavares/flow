@@ -91,7 +91,7 @@ function Map () {
       for (var o in this.objects) {
         if (this.objects[o] != object) {
           if (this.objects[o].pos.eq(positions[p]) &&
-          this.collide(this.objects[o], object)) {
+              this.collide(this.objects[o], object)) {
             return true;
           }
         }
@@ -101,16 +101,34 @@ function Map () {
     return false;
   }
 
-  this.collide = function () {
-    return true;
+  this.collide = function (a, b) {
+    return a.solid() && b.solid();
   }
 
   this.queryTile = function (p) {
+    var candidates = [];
+
     for (var o in this.objects) {
       if (this.objects[o].pos.eq(p)) {
-        return this.objects[o].tile();
+        candidates.push(this.objects[o]);
       }
     }
+
+    if (candidates.length) {
+      candidates.sort(function (a, b) {
+        if (a.z > b.z) {
+          return -1;
+        } else
+        if (a.z < b.z) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+      return candidates[0].tile();
+    }
+
     return 'blank';
   }
 

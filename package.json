@@ -16,6 +16,7 @@
   },
   "bin": {
     "flow-client": "src/client.js",
-    "flow-server": "src/server.js"
+    "flow-server": "src/server.js",
+    "flow-gen": "src/gen.js"
   }
 }

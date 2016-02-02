@@ -1,5 +1,9 @@
 {
-  "blank": " ",
+  "blank": {
+    "char": " ",
+    "fg": "white",
+    "bg": "black"
+  },
   "character": {
     "char": "@",
     "fg": "black",
@@ -17,11 +21,11 @@
     "char": " "
   },
   "console:disabled": {
-    "char": "!",
+    "char": "=",
     "fg": "red"
   },
   "console:enabled": {
-    "char": "!",
+    "char": "=",
     "fg": "green"
   }
 }

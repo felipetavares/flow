@@ -60,6 +60,7 @@ exports.init = function (_socket, _game) {
         Terminal.terminal.color(7);
         Terminal.terminal.bgColor(0);
         Terminal.terminal.clear();
+        renderBackground();
         Terminal.terminal.hideCursor(true);
       },
       't:out': function () {
@@ -70,15 +71,8 @@ exports.init = function (_socket, _game) {
       server(['go', d.x, d.y]);
     }),
     'login': {
-      // Everything is handled in the 'change' events
     },
     'register': {
-      'k:q': function () {
-        return true;
-      },
-      'k:any': function (character) {
-        // Do something
-      }
     }
   });
 
@@ -95,9 +89,8 @@ exports.init = function (_socket, _game) {
     },
     'game': {
       'k:q': function () {
-        server(['logout'], function () {
-          compositor.goTo([]);
-        });
+        server(['logout']);
+        return true;
       },
       't:clear': function () {
         ui.clear(game.map);
@@ -108,6 +101,8 @@ exports.init = function (_socket, _game) {
         game.loadState(msg);
 
         render();
+
+        ui.draw();
       }
     }
   });
@@ -133,7 +128,10 @@ exports.init = function (_socket, _game) {
       if (make) {
         var menu = ['[L]ogin', '[R]egister', '[Q]uit'];
 
+        Terminal.terminal.color(7);
+        Terminal.terminal.bgColor(0);
         Terminal.terminal.clear();
+
         Terminal.terminal.singleLineMenu(menu, function (error, input) {
           switch (input.selectedIndex) {
             case 0:
@@ -247,6 +245,32 @@ function render () {
     Terminal.terminal.moveTo(screenPos.x, screenPos.y);
     Terminal.terminal.color(colors[char.fg]);
     Terminal.terminal.bgColor(colors[char.bg]);
+    Terminal.terminal(char.char);
+  }
+}
+
+function renderBackground () {
+  var colors = {
+    'black': 0,
+    'red': 1,
+    'green': 2,
+    'yellow': 3,
+    'blue': 4,
+    'magneta': 5,
+    'cyan': 6,
+    'white': 7
+  };
+
+
+  var tileset = game.map.terminalTileset;
+  var char = tileset.character(tileset.code('blank'));
+  var chars = Terminal.terminal.width*Terminal.terminal.height;
+
+  Terminal.terminal.moveTo(1, 1);
+  Terminal.terminal.color(colors[char.fg]);
+  Terminal.terminal.bgColor(colors[char.bg]);
+
+  for (var i=0;i<chars;i++) {
     Terminal.terminal(char.char);
   }
 }

@@ -49,16 +49,19 @@ function Compositor () {
     for (var k in statemap) {
       var keyMatch, stateMatch;
 
-      keyMatch = /(.*:)any$/.exec(k);
-      stateMatch = /(.*:).*$/.exec(state);
+      keyMatch = /(.*):any$/.exec(k);
+      stateMatch = /(.*):.*$/.exec(state);
 
       // Use the ':any' key to transition on any state
       // 'k:any' transitions with any state that starts
       // with 'k:'
       if (k === state || (keyMatch && stateMatch &&
-                          keyMatch[1] == stateMatch[1])) {
+                          keyMatch[1] == stateMatch[1])
+                      || (keyMatch && !stateMatch &&
+                          keyMatch[1] == '')) {
         // Okay, we are good to go! Single state!
         if (typeof statemap[k] === 'function') {
+          this.currentState = k;
           var previousState = this.currentState;
 
           if (statemap[k](state, data)) {
@@ -69,7 +72,7 @@ function Compositor () {
           if (this.changemap) {
             var callback;
 
-            if (this.composition) {
+            if (this.composition && this.composition !== this.states) {
               callback = this.changemap[this.currentState];
             } else {
               callback = this.changemap['global'];
@@ -106,6 +109,7 @@ function Compositor () {
   }
 
   this.goTo = function (stateSequence) {
+    var previousState = this.currentState
     this.composition = this.states;
 
     for (var s in stateSequence) {
@@ -115,6 +119,12 @@ function Compositor () {
     if (this.composition === this.states) {
       this.composition = null;
       this.currentState = null;
+    }
+
+    if (stateSequence.length == 0 &&
+        this.changemap &&
+        this.changemap['global']) {
+      this.changemap['global'](previousState!==this.currentState);
     }
   }
 
