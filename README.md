@@ -1,6 +1,6 @@
 # Flow
 
-![Flow Screenshot](/felipetavares/flow/blob/master/design/screenshots/client01.png)
+![Flow Screenshot](/design/screenshots/client01.png)
 
 Flow wants to be a mud.
 
