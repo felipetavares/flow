@@ -92,7 +92,7 @@ socket.on('message', function (msg, remoteAddr) {
       Log.log('Token: invalid');
     }
   } else {
-    // Only login & registe are allowed without an
+    // Only login & register are allowed without an
     // access token
     if (action.action.length == 3 &&
         action.action[0] == 'login' ||
@@ -181,6 +181,17 @@ function init () {
 
       if (character) {
         character.move(new Vec.Vec2(input[1], input[2]));
+      }
+    })]]));
+
+    game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('access', function (addr, token, input) {
+      var character = User.characters(token, game.map)[0];
+
+      if (character) {
+        var position = new Vec.Vec2(input[1], input[2]);
+        position = position.add(character.pos);
+
+        game.map.action('access', position);
       }
     })]]));
 
