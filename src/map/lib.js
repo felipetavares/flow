@@ -108,6 +108,21 @@ function Map () {
     return 'blank';
   }
 
+  /*
+    Execute on the first object at 'where'
+    that supports the action
+  */
+  this.action = function (name, where) {
+    for (var o in this.objects) {
+      if (this.objects[o].pos.eq(where)) {
+        if (this.objects[o][name]) {
+          this.objects[o][name]();
+          break;
+        }
+      }
+    }
+  }
+
   this.getObjectsInView = function (start, size) {
     var inView = [];
     for (var o in this.objects) {

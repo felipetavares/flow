@@ -7,7 +7,8 @@ function Console () {
 
   this.move = function () {
   }
-  this.enable = function () {
+
+  this.access = function () {
     this.disabled = false;
 
     this.activateConnected('enable');

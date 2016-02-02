@@ -7,7 +7,7 @@
   },
   "concrete_wall": {
     "char": "#",
-    "fg": "gray"
+    "fg": "white"
   },
   "sliding_door:closed": {
     "char": "|",

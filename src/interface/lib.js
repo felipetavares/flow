@@ -17,23 +17,6 @@ exports.init = function (_socket, _game) {
 
   var currentScreen = {};
 
-  /*
-    Makes stdin do not wait for entire lines
-  */
-  //process.stdin.setRawMode(true);
-
-  /*
-    Send character to the compositor as soon as
-    it arrives
-  */
-  // process.stdin.on('readable', function () {
-  //   var buffer = process.stdin.read();
-
-  //   if (buffer) {
-  //     compositor.insert('k:'+buffer.toString(), buffer);
-  //   }
-  // });
-
   Terminal.terminal.grabInput(true);
   Terminal.terminal.fullscreen();
 
@@ -47,6 +30,7 @@ exports.init = function (_socket, _game) {
     more interesting to the user than the app's
     name.
   */
+  Terminal.terminal.windowTitle('Flow Client')
 
   /*
     Decide what to do with input characters
@@ -65,9 +49,8 @@ exports.init = function (_socket, _game) {
           return true;
         } else {
           server(['screen', Terminal.terminal.width, Terminal.terminal.height], function () {
-            setTimeout(function () {
-              compositor.insert('t:out');
-            }, 1000);
+            // 1 sec timeout
+            timeout(1);
           });
         }
       },
@@ -143,6 +126,15 @@ exports.init = function (_socket, _game) {
     }
   });
 
+  compositor.on({
+    'game': {
+      'k:a': compositor.directional(function (d) {
+        server(['access', d.x, d.y]);
+        compositor.goTo(['game']);
+      })
+    }
+  });
+
   /*
     Execute after each state change
 
@@ -193,6 +185,8 @@ exports.init = function (_socket, _game) {
           Terminal.terminal('\n');
           username = input;
 
+          Terminal.terminal.windowTitle(username+' on The Flow');
+
           Terminal.terminal('Password: ');
           Terminal.terminal.inputField({echo: false}, function (error, input) {
             Terminal.terminal('\n');
@@ -200,9 +194,7 @@ exports.init = function (_socket, _game) {
 
             server(['login', username, encrypt(password)], function () {
               compositor.goTo(['wait']);
-              setTimeout(function () {
-                compositor.insert('t:out');
-              }, 1000);
+              timeout(1);
             });
           });
         });
@@ -259,6 +251,12 @@ function quit (code) {
 
 function encrypt (password) {
   return Crypto.createHash('sha256').update(password).digest().toString();
+}
+
+function timeout (time) {
+  setTimeout(function () {
+    compositor.insert('t:out');
+  }, 1000*time);
 }
 
 var Crypto = require('crypto');
