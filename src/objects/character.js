@@ -5,7 +5,7 @@ function Character (characterId) {
 
   this.characterId = characterId;
 
-  this.move = function (direction, character, user) {
+  this.access = function (character, user) {
     this.map.message(new Packet.Message('Hello user!', user));
   }
 

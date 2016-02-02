@@ -5,7 +5,7 @@ var compositor;
 /* Link to server */
 var socket;
 
-var view;
+var ui;
 
 exports.init = function (_socket, _game) {
   /*
@@ -15,7 +15,7 @@ exports.init = function (_socket, _game) {
   socket = _socket;
   game = _game;
 
-  var currentScreen = {};
+  ui = new Ui.Ui();
 
   Terminal.terminal.grabInput(true);
   Terminal.terminal.fullscreen();
@@ -57,6 +57,10 @@ exports.init = function (_socket, _game) {
       'm:screen': function (state, msg) {
         game.loadState(msg);
         compositor.goTo(['game']);
+        Terminal.terminal.color(7);
+        Terminal.terminal.bgColor(0);
+        Terminal.terminal.clear();
+        Terminal.terminal.hideCursor(true);
       },
       't:out': function () {
         return true;
@@ -95,33 +99,15 @@ exports.init = function (_socket, _game) {
           compositor.goTo([]);
         });
       },
+      't:clear': function () {
+        ui.clear(game.map);
+
+        render();
+      },
       'm:update': function (state, msg) {
         game.loadState(msg);
 
-        var colors = {
-          'black': 0,
-          'red': 1,
-          'green': 2,
-          'yellow': 3,
-          'blue': 4,
-          'magneta': 5,
-          'cyan': 6,
-          'white': 7
-        };
-
-        for (var u in game.map.updatedPositions) {
-          var pos = game.map.updatedPositions[u];
-          var tileset = game.map.terminalTileset;
-
-          var char = tileset.character(tileset.code(game.map.queryTile(pos)));
-
-          var screenPos = pos.sub(game.map.min).add(new Vec.Vec2(1, 1));
-
-          Terminal.terminal.moveTo(screenPos.x, screenPos.y);
-          Terminal.terminal.color(colors[char.fg]);
-          Terminal.terminal.bgColor(colors[char.bg]);
-          Terminal.terminal(char.char);
-        }
+        render();
       }
     }
   });
@@ -164,12 +150,6 @@ exports.init = function (_socket, _game) {
       }
     },
     'game': function (make) {
-      if (make) {
-        Terminal.terminal.color(7);
-        Terminal.terminal.bgColor(0);
-        Terminal.terminal.clear();
-        Terminal.terminal.hideCursor(true);
-      }
     },
     'login': function (make) {
       /*
@@ -226,15 +206,49 @@ exports.init = function (_socket, _game) {
   })
 }
 
+var messageTimeout;
+
 exports.message = function (msg) {
   if (!game.token && msg.token)
     game.token = msg.token;
 
   for (var m in msg.messages) {
-    Terminal.terminal(msg.messages[m].text);
+    ui.printSegment(msg.messages[m].text, new Vec.Vec2(1, 1));
+
+    clearTimeout(messageTimeout);
+    messageTimeout = setTimeout(function () {
+      compositor.insert('t:clear');
+    }, 1000*5);
   }
 
   compositor.insert('m:'+msg.action[0], msg);
+}
+
+function render () {
+  var colors = {
+    'black': 0,
+    'red': 1,
+    'green': 2,
+    'yellow': 3,
+    'blue': 4,
+    'magneta': 5,
+    'cyan': 6,
+    'white': 7
+  };
+
+  for (var u in game.map.updatedPositions) {
+    var pos = game.map.updatedPositions[u];
+    var tileset = game.map.terminalTileset;
+
+    var char = tileset.character(tileset.code(game.map.queryTile(pos)));
+
+    var screenPos = pos.sub(game.map.min).add(new Vec.Vec2(1, 1));
+
+    Terminal.terminal.moveTo(screenPos.x, screenPos.y);
+    Terminal.terminal.color(colors[char.fg]);
+    Terminal.terminal.bgColor(colors[char.bg]);
+    Terminal.terminal(char.char);
+  }
 }
 
 function server (data, done) {
@@ -269,3 +283,4 @@ var Vec = require('../vec/lib.js');
 var Map = require('../map/lib.js');
 var Compositor = require('./compositor.js');
 var Terminal = require('terminal-kit');
+var Ui = require('./ui.js');
