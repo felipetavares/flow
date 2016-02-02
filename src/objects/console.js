@@ -8,19 +8,14 @@ function Console () {
   this.move = function () {
   }
 
-  this.access = function () {
-    this.disabled = false;
+  this.access = function (character, user) {
+    this.disabled = !this.disabled;
 
-    this.activateConnected('enable');
-  }
-  this.disable = function () {
-    this.disabled = true;
-
-    this.activateConnected('disable');
+    this.activateConnected(this.disabled?'disable':'enable', character, user);
   }
 
   this.tile = function () {
-    return 'console:'+this.disabled?'disabled':'enabled';
+    return 'console:'+(this.disabled?'disabled':'enabled');
   }
 }
 
