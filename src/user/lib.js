@@ -178,7 +178,7 @@ function update (socket, game) {
     var chars = characters(s, game.map);
 
     for (var c in chars) {
-      var gameState = game.getState(chars[c]);
+      var gameState = game.getState(chars[c], sessions[s]);
       gameState.action = ['update'];
       var retMsg = new Buffer(JSON.stringify(gameState));
 

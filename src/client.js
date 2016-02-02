@@ -22,11 +22,7 @@ function init () {
   socket.on('message', function (msg, remoteAddr) {
     var state = JSON.parse(msg.toString());
 
-    if (state.error) {
-      Interface.error(state.error);
-    } else {
-      Interface.message(state);
-    }
+    Interface.message(state);
   });
 
   game.map.terminalTileset.load('./assets/terminal.json', function () {

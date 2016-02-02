@@ -16,7 +16,7 @@ function serialize (o) {
       }
 
       if (typeof o[p] === 'function') {
-      } else if (typeof o[p] === 'object' && !o[p].length) {
+      } else if (typeof o[p] === 'object' && o[p].length === undefined) {
         of[p] = serialize(o[p]);
       } else if (typeof o[p] === 'object' && o[p].length) {
         of[p] = new Array();
@@ -44,7 +44,7 @@ function unserialize (of) {
         continue;
       }
 
-      if (typeof of[p] === 'object' && !of[p].length) {
+      if (typeof of[p] === 'object' && of[p].length === undefined) {
         o[p] = unserialize(of[p]);
       } else if (typeof of[p] === 'object' && of[p].length) {
         o[p] = new Array();
