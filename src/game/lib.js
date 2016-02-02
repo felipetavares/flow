@@ -25,8 +25,8 @@ function Game () {
     this.cmds.push(cmd);
   }
 
-  this.getState = function (player) {
-    return this.map.getState(player);
+  this.getState = function (player, user) {
+    return this.map.getState(player, user);
   }
 
   this.loadState = function (state) {

@@ -230,6 +230,10 @@ exports.message = function (msg) {
   if (!game.token && msg.token)
     game.token = msg.token;
 
+  for (var m in msg.messages) {
+    Terminal.terminal(msg.messages[m].text);
+  }
+
   compositor.insert('m:'+msg.action[0], msg);
 }
 

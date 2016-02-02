@@ -123,6 +123,8 @@ socket.on('close', function () {
 });
 
 function save (done) {
+  game.map.clear();
+
   var data = Util.serialize(game.map);
   // Pretty
   //data = JSON.stringify(data, null, 2);
@@ -180,7 +182,7 @@ function init () {
       var character = User.characters(token, game.map)[0];
 
       if (character) {
-        character.move(new Vec.Vec2(input[1], input[2]));
+        character.move(new Vec.Vec2(input[1], input[2]), character, User.get(token));
       }
     })]]));
 
@@ -191,7 +193,7 @@ function init () {
         var position = new Vec.Vec2(input[1], input[2]);
         position = position.add(character.pos);
 
-        game.map.action('access', position);
+        game.map.action('access', position, character, User.get(token));
       }
     })]]));
 

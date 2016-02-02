@@ -13,6 +13,12 @@ function Map () {
   this.graphicalTileset = null;
   this.terminalTileset = new Tileset.Tileset();
 
+  this.messages = [];
+
+  this.message = function (message) {
+    this.messages.push(message);
+  }
+
   this.characterFromId = function (id) {
     for (var o in this.objects) {
       if (this.objects[o].characterId == id)
@@ -112,11 +118,11 @@ function Map () {
     Execute on the first object at 'where'
     that supports the action
   */
-  this.action = function (name, where) {
+  this.action = function (name, where, character, user) {
     for (var o in this.objects) {
       if (this.objects[o].pos.eq(where)) {
         if (this.objects[o][name]) {
-          this.objects[o][name]();
+          this.objects[o][name](character, user);
           break;
         }
       }
@@ -136,7 +142,7 @@ function Map () {
     return this.max.sub(this.min);
   }
 
-  this.getState = function (player) {
+  this.getState = function (player, user) {
     var state = new Packet.WorldState();
     var viewSize = player.screen?player.screen:new Vec.Vec2(16, 8);
     var inView = this.getObjectsInView(player.pos.sub(viewSize.div(2)),
@@ -151,6 +157,17 @@ function Map () {
 
     state.min = Util.serialize(min);
     state.max = Util.serialize(max);
+
+    for (var m=0;m<this.messages.length;m++) {
+      var msg = this.messages[m];
+
+      if (msg.user == user) {
+        msg.user = undefined;
+        state.messages.push(msg);
+        this.messages.splice(m, 1);
+        m--;
+      }
+    }
 
     return state;
   }
@@ -177,6 +194,11 @@ function Map () {
     for (var o in this.objects) {
       this.updatedPositions.push(this.objects[o].pos);
     }
+  }
+
+  // Clear variables that shan't be written to fs
+  this.clear = function () {
+    this.messages = undefined;
   }
 }
 
