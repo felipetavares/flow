@@ -1,5 +1,7 @@
 # Flow
 
+![Flow Screenshot](/felipetavares/flow/blob/master/design/screenshots/client01.png)
+
 Flow wants to be a mud.
 
 It is a project from the [ctrl-c club](http://ctrl-c.club/) members,
