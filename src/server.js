@@ -124,19 +124,19 @@ socket.on('close', function () {
 
 function save (done) {
   game.map.clear();
+  Util.serialize(game.map, function (data) {
+    // Pretty
+    //data = JSON.stringify(data, null, 2);
+    // Not pretty
+    data = JSON.stringify(data);
 
-  var data = Util.serialize(game.map);
-  // Pretty
-  //data = JSON.stringify(data, null, 2);
-  // Not pretty
-  data = JSON.stringify(data);
-
-  Fs.writeFile(mapFileName, data, function (error) {
-    if (error) {
-      done(error);
-    } else {
-      User.save(done);
-    }
+    Fs.writeFile(mapFileName, data, function (error) {
+      if (error) {
+        done(error);
+      } else {
+        User.save(done);
+      }
+    });
   });
 }
 
@@ -148,21 +148,23 @@ function load (done) {
       Fs.readFile(mapFileName, function (error, content) {
         if (!error) {
           game.map = JSON.parse(content);
-          game.map = Util.unserialize(game.map);
+          Util.unserialize(game.map, function (map) {
+            game.map = map;
 
-          /*
-            Because the objects weren't added using
-            map.add, they don't have a .map propertie,
-            so we fix this here.
+            /*
+              Because the objects weren't added using
+              map.add, they don't have a .map propertie,
+              so we fix this here.
 
-            Maybe it would be better to move this over
-            to a function at map/lib.js?
-          */
-          for (var o in game.map.objects) {
-            game.map.objects[o].map = game.map;
-          }
+              Maybe it would be better to move this over
+              to a function at map/lib.js?
+            */
+            for (var o in game.map.objects) {
+              game.map.objects[o].map = game.map;
+            }
 
-          User.load(done);
+            User.load(done);
+          });
         } else {
           User.load(done);
         }

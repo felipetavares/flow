@@ -13,7 +13,7 @@ function Map () {
   this.graphicalTileset = null;
   this.terminalTileset = new Tileset.Tileset();
 
-  this.messages = [];
+  this.messages = new Array();
 
   this.message = function (message) {
     this.messages.push(message);
@@ -160,63 +160,76 @@ function Map () {
     return this.max.sub(this.min);
   }
 
-  this.getState = function (player, user) {
+  this.getState = function (player, user, done) {
     var state = new Packet.WorldState();
     var viewSize = player.screen?player.screen:new Vec.Vec2(16, 8);
     var inView = this.getObjectsInView(player.pos.sub(viewSize.div(2)),
                                        viewSize);
 
-    for (var o in inView) {
-      state.objects.push(Util.serialize(inView[o]));
-    }
+    var _this = this;
 
-    var min = player.pos.sub(viewSize.div(2));
-    var max = min.add(viewSize);
+    Util.serialize(inView, function (objects) {
+      state.objects = objects;
 
-    state.min = Util.serialize(min);
-    state.max = Util.serialize(max);
+      var min = player.pos.sub(viewSize.div(2));
+      var max = min.add(viewSize);
 
-    for (var m=0;m<this.messages.length;m++) {
-      var msg = this.messages[m];
+      Util.serialize([min, max], function (array) {
+        state.min = array[0];
+        state.max = array[1];
 
-      if (msg.user == user) {
-        msg.user = undefined;
-        state.messages.push(msg);
-        this.messages.splice(m, 1);
-        m--;
-      }
-    }
+        for (var m=0;m<_this.messages.length;m++) {
+          var msg = _this.messages[m];
 
-    return state;
+          if (msg.user == user) {
+            delete msg.user;
+            state.messages.push(msg);
+            _this.messages.splice(m, 1);
+            m--;
+          }
+        }
+
+        done(state);
+      });
+    });
   }
 
-  this.loadState = function (state) {
-    min = Util.unserialize(state.min);
-    max = Util.unserialize(state.max);
-    this.updatedPositions = new Array();
+  this.loadState = function (state, done) {
+    var _this = this;
 
-    // Updated the old positions of the objects
-    for (var o in this.objects) {
-      this.updatedPositions.push(this.objects[o].pos.sub(this.min.sub(min)));
-    }
+    Util.unserialize([state.min, state.max], function (array) {
+      var min = array[0];
+      var max = array[1];
 
-    this.min = min;
-    this.max = max;
-    this.objects = new Array();
+      _this.updatedPositions = new Array();
 
-    for (var o in state.objects) {
-      this.add(Util.unserialize(state.objects[o]));
-    }
+      // Updated the old positions of the objects
+      for (var o in _this.objects) {
+        _this.updatedPositions.push(_this.objects[o].pos.sub(_this.min.sub(min)));
+      }
 
-    // And the new ones
-    for (var o in this.objects) {
-      this.updatedPositions.push(this.objects[o].pos);
-    }
+      _this.min = min;
+      _this.max = max;
+      _this.objects = new Array();
+
+      Util.unserialize(state.objects, function (objects) {
+        for (var o in objects) {
+          _this.add(objects[o]);
+        }
+
+        // And the new ones
+        for (var o in _this.objects) {
+          _this.updatedPositions.push(_this.objects[o].pos);
+        }
+
+        done();
+      });
+    });
   }
 
   // Clear variables that shan't be written to fs
   this.clear = function () {
-    this.messages = undefined;
+    delete this.messages;
   }
 }
 

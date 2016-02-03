@@ -1,64 +1,165 @@
-function asKey (addr) {
-    return addr.address+addr.port;
-}
+function serialize (o, done) {
+  if (typeof o === 'object' &&
+      o !== null &&
+      o.length === undefined) {
+    // Serialized object
+    var of = new Object();
+    var readLength = 0;
+    var execLength = 0;
 
-function serialize (o) {
-  var of = {};
-
-  if (((typeof o === 'object') ||
-      (typeof o === 'function')) && o != null) {
+    // Loop through all object's properties
     for (var p in o) {
-      if (p == 'map' || p == 'prototype')
+      // Ignore map because it is circular
+      if (p === 'map') {
         continue;
-      if (o[p] === null) {
-        of[p] = null;
-        continue;
-      }
-
-      if (typeof o[p] === 'function') {
-      } else if (typeof o[p] === 'object' && o[p].length === undefined) {
-        of[p] = serialize(o[p]);
-      } else if (typeof o[p] === 'object' && o[p].length) {
-        of[p] = new Array();
-        for (var k in o[p]) {
-          of[p].push(serialize(o[p][k]));
-        }
       } else {
-        of[p] = o[p];
+        readLength ++;
       }
-    }
-  } else {
-      of = o;
-  }
 
-  return of;
+      setTimeout((function (p) {
+        return (function () {
+          serialize(o[p], function (n) {
+            if (n !== undefined)
+              of[p] = n;
+
+            execLength++;
+
+            if (readLength == execLength) {
+              setTimeout(function () {
+                done(of);
+              }, 0);
+            }
+          });
+        });
+      })(p), 0);
+    }
+
+    if (!readLength) {
+      setTimeout(function () {
+        done(of)
+      }, 0);
+    }
+  } else
+  // An array
+  if (typeof o === 'object') {
+    // Serialized array
+    var of = new Array();
+    var readLength = 0;
+    var execLength = 0;
+
+    // Loop through all object's properties
+    for (var p in o) {
+      readLength ++;
+
+      setTimeout((function (p) {
+        return (function () {
+          serialize(o[p], function (n) {
+            if (n !== undefined)
+              of[p] = n;
+
+            execLength++;
+
+            if (readLength == execLength) {
+              setTimeout(function () {
+                done(of)
+              }, 0);
+            }
+          });
+        });
+      })(p), 0);
+    }
+
+    if (!readLength) {
+      setTimeout(function () {
+        done(of)
+      }, 0);
+    }
+  } else
+  if (typeof o !== 'function') {
+    setTimeout(function () {
+      done(o);
+    }, 0);
+  } else {
+    setTimeout(function () {
+      done(o);
+    }, 0);
+  }
 }
 
-function unserialize (of) {
-  if ((typeof of === 'object') && of != null ) {
-    var o = (!of.id)?{}:new (eval(of.id));
+function unserialize (o, done) {
+  if (typeof o === 'object' &&
+      o !== null &&
+      o.length === undefined) {
+    // Unserialized object
+    var of = o.id===undefined?{}:(new (eval(o.id)));
 
-    for (var p in of) {
-      if (of[p] === null) {
-        o[p] = null;
-        continue;
-      }
+    var readLength = 0;
+    var execLength = 0;
 
-      if (typeof of[p] === 'object' && of[p].length === undefined) {
-        o[p] = unserialize(of[p]);
-      } else if (typeof of[p] === 'object' && of[p].length) {
-        o[p] = new Array();
-        for (var k in of[p]) {
-          o[p].push(unserialize(of[p][k]));
-        }
-      } else {
-        o[p] = of[p];
-      }
+    // Loop through all object's properties
+    for (var p in o) {
+      readLength ++;
+
+      setTimeout((function (p) {
+        return (function () {
+          unserialize(o[p], function (n) {
+            of[p] = n;
+
+            execLength++;
+
+            if (readLength == execLength) {
+              setTimeout(function () {
+                done(of)
+              }, 0);
+            }
+          });
+        });
+      })(p), 0);
     }
 
-    return o;
+    if (!readLength) {
+      setTimeout(function () {
+        done(of)
+      }, 0);
+    }
+  } else
+  // An array
+  if (typeof o === 'object') {
+    // Serialized array
+    var of = new Array();
+    var readLength = 0;
+    var execLength = 0;
+
+    // Loop through all object's properties
+    for (var p in o) {
+      readLength ++;
+
+      setTimeout((function (p) {
+        return (function () {
+          unserialize(o[p], function (n) {
+            of[p] = n;
+
+            execLength++;
+
+            if (readLength == execLength) {
+              setTimeout(function () {
+                done(of)
+              }, 0);
+            }
+          });
+        });
+      })(p), 0);
+    }
+
+    if (!readLength) {
+      setTimeout(function () {
+        done(of)
+      }, 0);
+    }
   } else {
-    return of;
+    setTimeout(function () {
+      done(o);
+    }, 0);
   }
 }
 
@@ -77,7 +178,6 @@ function hashCode(string) {
 }
 
 module.exports = {
-  'asKey': asKey,
   'serialize': serialize,
   'unserialize': unserialize,
   'hashCode': hashCode

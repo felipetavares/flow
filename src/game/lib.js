@@ -25,12 +25,12 @@ function Game () {
     this.cmds.push(cmd);
   }
 
-  this.getState = function (player, user) {
-    return this.map.getState(player, user);
+  this.getState = function (player, user, done) {
+    this.map.getState(player, user, done);
   }
 
-  this.loadState = function (state) {
-    this.map.loadState(state);
+  this.loadState = function (state, done) {
+    this.map.loadState(state, done);
   }
 }
 

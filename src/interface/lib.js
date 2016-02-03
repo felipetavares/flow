@@ -55,13 +55,15 @@ exports.init = function (_socket, _game) {
         }
       },
       'm:screen': function (state, msg) {
-        game.loadState(msg);
         compositor.goTo(['game']);
-        Terminal.terminal.color(7);
-        Terminal.terminal.bgColor(0);
-        Terminal.terminal.clear();
-        renderBackground();
-        Terminal.terminal.hideCursor(true);
+        game.loadState(msg, function () {
+          Terminal.terminal('hi!');
+          Terminal.terminal.color(7);
+          Terminal.terminal.bgColor(0);
+          Terminal.terminal.clear();
+          renderBackground();
+          Terminal.terminal.hideCursor(true);
+        });
       },
       't:out': function () {
         return true;
@@ -98,11 +100,10 @@ exports.init = function (_socket, _game) {
         render();
       },
       'm:update': function (state, msg) {
-        game.loadState(msg);
-
-        render();
-
-        ui.draw();
+        game.loadState(msg, function () {
+          render();
+          ui.draw();
+        });
       }
     }
   });

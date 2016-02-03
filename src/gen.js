@@ -6,7 +6,7 @@ function init () {
   // Creates a compositor to interpret the commands
   var compositor = new Compositor.Compositor();
 
-  var sourceFileName = null;
+  var sourceFileName = '';
   var destinationFileName = null;
 
   compositor.on({
@@ -31,87 +31,73 @@ function init () {
     process.exit(1);
   }
 
-  if (sourceFileName === null) {
-    interactive(destinationFileName);
-  } else {
-    run(sourceFileName, destinationFileName);
-  }
+  interactive(destinationFileName, sourceFileName);
 }
 
-function interactive (to) {
-  var map = new Map.Map();
+function interactive (to, from) {
   var compositor = new Compositor.Compositor();
 
-  compositor.on({
-    'cryo': function () {
-      var door = new Objects.SlidingDoor();
-      var cons = new Objects.Console();
-      var walls = [];
+  load(from, function (map) {
+    if (!map)
+      map = new Map.Map();
 
-      walls[0] = new Objects.ConcreteWall();
-      walls[1] = new Objects.ConcreteWall();
-      walls[2] = new Objects.ConcreteWall();
-      walls[3] = new Objects.ConcreteWall();
-      walls[4] = new Objects.ConcreteWall();
-      walls[5] = new Objects.ConcreteWall();
-
-      door.pos = new Vec.Vec2(10, 10);
-      walls[0].pos = new Vec.Vec2(10, 9);
-      cons.pos = new Vec.Vec2(9, 9);
-      walls[1].pos = new Vec.Vec2(8, 9);
-      walls[2].pos = new Vec.Vec2(8, 10);
-      walls[3].pos = new Vec.Vec2(8, 11);
-      walls[4].pos = new Vec.Vec2(9, 11);
-      walls[5].pos = new Vec.Vec2(10, 11);
-
-      map.add(door);
-      map.add(cons);
-      for (var w in walls) {
-        map.add(walls[w]);
-      }
-
-      cons.connect(door.uniqueId, {
-        'enable': 'open',
-        'disable': 'close'
-      });
-
-      return true;
-    },
-    'save': function () {
-      save(map, to, function (error) {
-        if (error) {
-          console.log('error writing to '+to+':\n\t'+error);
-        } else {
-          console.log('written to '+to);
+    compositor.on({
+      'clear': function () {
+        for (o in map.objects) {
+          if (map.objects[o].id !== 'Objects.Character') {
+            delete map.objects[o];
+          }
         }
+        return true;
+      },
+      'save': function () {
+        setTimeout(function () {
+          save(map, to, function (error) {
+            if (error) {
+              console.log('error writing to '+to+':\n\t'+error);
+            } else {
+              console.log('written to '+to);
+            }
 
+            process.exit(0);
+          });
+        }, 0);
+
+        console.log('writing...');
+      },
+      'log': function () {
+        console.log(map);
+        return true;
+      },
+      'exit': function () {
         process.exit(0);
-      });
+      },
+      ':any': function (name) {
+        var type = require('./gen/'+name+'.js');
+        var obj = new type(undefined, map);
 
-      console.log('writing...');
-    },
-    'exit': function () {
-      process.exit(0);
-    }
-  });
-
-  compositor.change({
-    'global': function (make) {
-      if (make) {
-        process.stdout.write('% ');
+        return true;
       }
-    }
-  });
+    });
 
-  process.stdin.on('readable', function () {
-    var buffer = process.stdin.read();
+    compositor.change({
+      'global': function (make) {
+        if (make) {
+          process.stdout.write('% ');
+        }
+      }
+    });
 
-    if (buffer) {
-      var str = buffer.toString();
-      str = str.slice(0, str.length-1);
+    process.stdin.on('readable', function () {
+      var buffer = process.stdin.read();
 
-      compositor.insert(str);
-    }
+      if (buffer) {
+        var str = buffer.toString();
+        str = str.slice(0, str.length-1);
+
+        compositor.insert(str);
+      }
+    });
   });
 }
 
@@ -122,12 +108,32 @@ function run (from, to) {
 function save (map, to, done) {
   map.clear();
 
-  var data = Util.serialize(map);
-  data = JSON.stringify(data);
+  Util.serialize(map, function (data) {
+    data = JSON.stringify(data);
 
-  Fs.writeFile(to, data, function (error) {
-    if (error) {
-      done(error);
+    Fs.writeFile(to, data, function (error) {
+      if (error) {
+        done(error);
+      } else {
+        done(false);
+      }
+    });
+  });
+}
+
+function load (from, done) {
+  Fs.exists(from, function (exists) {
+    if (exists) {
+      Fs.readFile(from, function (error, content) {
+        if (!error) {
+          map = JSON.parse(content);
+          Util.unserialize(map, function (map) {
+            done(map);
+          });
+        } else {
+          done(false);
+        }
+      });
     } else {
       done(false);
     }

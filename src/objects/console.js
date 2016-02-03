@@ -5,6 +5,8 @@ function Console () {
 
   this.disabled = true;
 
+  this.z = 0.5;
+
   this.move = function () {
   }
 

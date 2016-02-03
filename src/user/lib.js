@@ -53,18 +53,20 @@ function load (done) {
       Fs.readFile(usersFileName, function (error, content) {
         if (!error) {
           users = JSON.parse(content);
-          users = Util.unserialize(users);
+          Util.unserialize(users, function (_users) {
+            users = _users;
 
-          /*
-            Ensure we have this propertie even if it
-            wasn't in the fs version for any reason
+            /*
+              Ensure we have this propertie even if it
+              wasn't in the fs version for any reason
 
-            (e.g.: someone overitten the file)
-          */
-          if (!users.maxCharacterId)
-            users.maxCharacterId = 1;
+              (e.g.: someone overitten the file)
+            */
+            if (!users.maxCharacterId)
+              users.maxCharacterId = 1;
 
-          done(true);
+            done(true);
+          });
         } else {
           users.maxCharacterId = 1;
           done(false);
@@ -79,11 +81,12 @@ function load (done) {
 
 /* Save users to disk */
 function save (done) {
-  var data = Util.serialize(users);
-  data = JSON.stringify(data);
+  Util.serialize(users, function (data) {
+    data = JSON.stringify(data);
 
-  Fs.writeFile(usersFileName, data, function (error) {
-    done(error);
+    Fs.writeFile(usersFileName, data, function (error) {
+      done(error);
+    });
   });
 }
 
@@ -127,6 +130,7 @@ function logout (name) {
 
 /* Login */
 function login (name, password, addr) {
+  try {
   if (users[name]) {
     var token;
     if (token = users[name].login(name, password, addr)) {
@@ -142,6 +146,9 @@ function login (name, password, addr) {
     }
   } else {
     return false;
+  }
+  } catch (e) {
+    console.log (e);
   }
 }
 
@@ -178,13 +185,14 @@ function update (socket, game) {
     var chars = characters(s, game.map);
 
     for (var c in chars) {
-      var gameState = game.getState(chars[c], sessions[s]);
-      gameState.action = ['update'];
-      var retMsg = new Buffer(JSON.stringify(gameState));
+      game.getState(chars[c], sessions[s], function (gameState) {
+        gameState.action = ['update'];
+        var retMsg = new Buffer(JSON.stringify(gameState));
 
-      socket.send(retMsg, 0, retMsg.length,
-                  sessions[s].addr.port,
-                  sessions[s].addr.address);
+        socket.send(retMsg, 0, retMsg.length,
+                    sessions[s].addr.port,
+                    sessions[s].addr.address);
+      });
     }
   }
 }
