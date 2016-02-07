@@ -11,9 +11,10 @@ function Action (action, token) {
 
 function WorldState (token) {
   this.token = token;
-  this.objects = [];
+  this.objects = {};
   this.messages = [];
   this.error = false;
+  this.time = new Date().getTime();
 }
 
 module.exports = {

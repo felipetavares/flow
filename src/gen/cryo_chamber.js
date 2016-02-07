@@ -1,6 +1,6 @@
 module.exports = function (position, map) {
   if (position === undefined) {
-    position = new Vec.Vec2();
+    position = new Vec.Vec2(5000, 5000);
   }
 
   Gen.map(map);
@@ -25,6 +25,6 @@ module.exports = function (position, map) {
   });
 }
 
-var Gen = require('./lib.js');
-var Vec = require('../vec/lib.js');
-var Objects = require('../objects/lib.js');
+var Gen = require('./');
+var Vec = require('../vec');
+var Objects = require('../objects');

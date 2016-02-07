@@ -1,24 +1,64 @@
 function Map () {
   this.id = 'Map.Map';
 
+  /*
+    DUMP!
+    Only used by the client
+  */
   this.min = new Vec.Vec2(0, 0);
   this.max = new Vec.Vec2(0, 0);
 
+  /*
+    MAYBE
+  */
   this.maxObjectId = 0;
 
+  /*
+    DUMP!
+    Objects will be stored inside a Grid
+  */
   this.objects = new Object();
 
+  /*
+    DUMP!
+    Only used by the client
+  */
   this.updatedPositions = new Array();
 
+  /*
+    DUMP!
+    We need only one tileset
+  */
   this.graphicalTileset = null;
   this.terminalTileset = new Tileset.Tileset();
 
+  /*
+    DUMP!
+    The ones worried about messages are users!
+  */
   this.messages = new Array();
+  /*
+    DUMP!
+    Users will keep a list of dirty objects
+  */
+  this.dirty = new Array();
+
+  /*
+    DUMP!
+    Users will maintain a list of dirty properties
+  */
+  this.latestPacket = new Object();
+  this.latestPositions = new Object();
+  this.latestTime = 0;
 
   this.message = function (message) {
     this.messages.push(message);
   }
 
+  /*
+    DUMP!
+    We only need one object naming, not two
+  */
   this.characterFromId = function (id) {
     for (var o in this.objects) {
       if (this.objects[o].characterId == id)
@@ -165,10 +205,48 @@ function Map () {
     var viewSize = player.screen?player.screen:new Vec.Vec2(16, 8);
     var inView = this.getObjectsInView(player.pos.sub(viewSize.div(2)),
                                        viewSize);
+    var prevInView = this.latestPacket[user.name];
+    var positions = [];
+
+    for (var i in inView) {
+      var pos = new Vec.Vec2();
+      pos.assign(inView[i].pos);
+      positions.push(pos);
+    }
+
+    this.latestPacket[user.name] = inView;
+
+    var sendToClient = [];
+
+    for (var v in inView) {
+      var some = false;
+
+      if (prevInView) {
+        for (var p in prevInView) {
+          var e = prevInView[p];
+
+          var equal = (inView[v].uniqueId == e.uniqueId);
+
+          if (equal && !inView[v].pos.eq(this.latestPositions[user.name][p])) {
+            some = false;
+          } else if (equal) {
+            some = true;
+          }
+        }
+      }
+
+      if (!some) {
+        sendToClient.push(inView[v]);
+      }
+    }
+
+    console.log(sendToClient.length);
+
+    this.latestPositions[user.name] = positions;
 
     var _this = this;
 
-    Util.serialize(inView, function (objects) {
+    Util.serialize(sendToClient, function (objects) {
       state.objects = objects;
 
       var min = player.pos.sub(viewSize.div(2));
@@ -195,31 +273,51 @@ function Map () {
   }
 
   this.loadState = function (state, done) {
+    if (state.time < this.latestTime) {
+      done();
+      return;
+    }
+
     var _this = this;
 
     Util.unserialize([state.min, state.max], function (array) {
       var min = array[0];
       var max = array[1];
 
+      if (min === undefined || max === undefined)
+        return;
+
       _this.updatedPositions = new Array();
+      _this.dirty = new Array();
+
+      var screenSize = max.sub(min);
 
       // Updated the old positions of the objects
       for (var o in _this.objects) {
-        _this.updatedPositions.push(_this.objects[o].pos.sub(_this.min.sub(min)));
+        var pos = _this.objects[o].pos.sub(_this.min.sub(min));
+        var screenPos = pos.sub(min);
+
+        if (!_this.dirty[screenPos.y*screenSize.x+screenPos.x]) {
+          _this.dirty[screenPos.y*screenSize.x+screenPos.x] = true;
+          _this.updatedPositions.push(pos);
+        }
       }
 
       _this.min = min;
       _this.max = max;
-      _this.objects = new Array();
 
       Util.unserialize(state.objects, function (objects) {
         for (var o in objects) {
-          _this.add(objects[o]);
+          _this.objects[objects[o].uniqueId] = objects[o];
         }
 
         // And the new ones
         for (var o in _this.objects) {
-          _this.updatedPositions.push(_this.objects[o].pos);
+          var screenPos = _this.objects[o].pos.sub(min);
+          if (!_this.dirty[screenPos.y*screenSize.x+screenPos.x]) {
+            _this.dirty[screenPos.y*screenSize.x+screenPos.x] = true;
+            _this.updatedPositions.push(_this.objects[o].pos);
+          }
         }
 
         done();
@@ -230,6 +328,7 @@ function Map () {
   // Clear variables that shan't be written to fs
   this.clear = function () {
     delete this.messages;
+    delete this.latestPacket;
   }
 }
 

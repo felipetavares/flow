@@ -6,12 +6,13 @@
   },
   "character": {
     "char": "@",
-    "fg": "black",
-    "bg": "white"
+    "fg": "white",
+    "bg": "black"
   },
   "concrete_wall": {
-    "char": "#",
-    "fg": "white"
+    "char": " ",
+    "fg": "white",
+    "bg": "white"
   },
   "sliding_door:closed": {
     "char": "|",

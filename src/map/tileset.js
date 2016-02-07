@@ -80,5 +80,5 @@ module.exports = {
 /*
   For hashing strings
 */
-var Util = require('../util/lib.js');
+var Util = require('../util');
 var Fs = require('fs');

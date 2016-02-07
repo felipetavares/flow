@@ -8,14 +8,18 @@ function SlidingDoor () {
   this.move = function () {
   }
   this.open = function (character, user) {
+    user.setDirty(this, 'closed');
+
     this.closed = false;
 
-    this.map.message(new Packet.Message('The sliding door opens', user));
+    // this.map.message(new Packet.Message('The sliding door opens', user));
   }
   this.close = function (character, user) {
+    user.setDirty(this, 'closed');
+
     this.closed = true;
 
-    this.map.message(new Packet.Message('The sliding door closes', user));
+    // this.map.message(new Packet.Message('The sliding door closes', user));
   }
 
   this.tile = function () {
@@ -31,6 +35,6 @@ module.exports = {
   'SlidingDoor': SlidingDoor
 }
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');
 var DefaultObject = require('./default.js');
-var Packet = require('../packet/lib.js');
+var Packet = require('../packet');

@@ -24,7 +24,7 @@ function serialize (o, done) {
 
             execLength++;
 
-            if (readLength == execLength) {
+            if (readLength === execLength) {
               setTimeout(function () {
                 done(of);
               }, 0);
@@ -41,7 +41,7 @@ function serialize (o, done) {
     }
   } else
   // An array
-  if (typeof o === 'object') {
+  if (typeof o === 'object' && o !== null) {
     // Serialized array
     var of = new Array();
     var readLength = 0;
@@ -81,12 +81,13 @@ function serialize (o, done) {
     }, 0);
   } else {
     setTimeout(function () {
-      done(o);
+      done();
     }, 0);
   }
 }
 
 function unserialize (o, done) {
+  try {
   if (typeof o === 'object' &&
       o !== null &&
       o.length === undefined) {
@@ -124,7 +125,7 @@ function unserialize (o, done) {
     }
   } else
   // An array
-  if (typeof o === 'object') {
+  if (typeof o === 'object' && o !== null) {
     // Serialized array
     var of = new Array();
     var readLength = 0;
@@ -161,6 +162,9 @@ function unserialize (o, done) {
       done(o);
     }, 0);
   }
+  } catch (e) {
+    console.log(e.stack);
+  }
 }
 
 /*
@@ -177,17 +181,51 @@ function hashCode(string) {
   return hash;
 }
 
+function compress (packet, done) {
+  var buffer = new Buffer(JSON.stringify(packet));
+  Zlib.deflate(buffer, function(err, dbuffer) {
+    done(dbuffer);
+  });
+}
+
+function decompress (packet, done) {
+  Zlib.unzip(packet, function(err, buffer) {
+    done(JSON.parse(buffer.toString()));
+  });
+}
+
+function generatePositions (start, delta) {
+  var end = start.add(delta).add(new Vec2(0.5, 0.5));
+  var positions = new Array();
+  var position = new Vec2();
+  var increment = delta.norm();
+
+  position.assign(start.add(new Vec2(0.5, 0.5)));
+
+  do {
+    position.addeq(increment);
+    positions.push(position.integer());
+  } while(!position.integer().eq(end.integer()));
+
+  return positions;
+}
+
 module.exports = {
   'serialize': serialize,
   'unserialize': unserialize,
-  'hashCode': hashCode
+  'hashCode': hashCode,
+  'compress': compress,
+  'decompress': decompress,
+  'generatePositions': generatePositions
 };
 
-var Game = require('../game/lib.js');
-var Objects = require('../objects/lib.js');
-var Packet = require('../packet/lib.js');
-var Map = require('../map/lib.js');
-var Cmd = require('../cmd/lib.js');
-var Vec = require('../vec/lib.js');
-var Map = require('../map/lib.js');
-var User = require('../user/lib.js');
+var Game = require('../game');
+var Objects = require('../objects');
+var Packet = require('../packet');
+var Map = require('../map');
+var Cmd = require('../cmd');
+var Vec2 = require('../vec').Vec2;
+var Vec = require('../vec');
+var Map = require('../map');
+var User = require('../user');
+var Zlib = require('zlib');

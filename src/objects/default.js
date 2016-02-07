@@ -1,11 +1,24 @@
 module.exports = function () {
   this.map = null;
   this.connected = new Array();
-  this.pos = new Vec.Vec2();
+  this.x = 5000;
+  this.y = 5000;
   this.z = 0;
 
-  this.move = function (delta) {
-    return this.map.tryMove(this, delta);
+  this.move = function (delta, character, user) {
+    var prevX = this.x;
+    var prevY = this.y;
+
+    this.map.move(this, delta);
+
+    if (prevX !== this.x) {
+      user.setDirty(this, 'x');
+    }
+    if (prevY !== this.y) {
+      user.setDirty(this, 'y');
+    }
+
+    user.updateClose(this.map, this.pos());
   }
 
   this.connect = function (to, actionsMap) {
@@ -16,9 +29,8 @@ module.exports = function () {
   }
 
   this.activateConnected = function (action, character, user) {
-    // Enable all connected objects
     for (var c in this.connected) {
-      var o = this.map.objects[this.connected[c].uniqueId];
+      var o = this.map.get(this.connected[c].uniqueId);
       o[this.connected[c].action[action]](character, user);
     }
   }
@@ -27,9 +39,18 @@ module.exports = function () {
     return true;
   }
 
+  this.pos = function (newPos) {
+    if (newPos !== undefined) {
+      this.x = newPos.x;
+      this.y = newPos.y;
+    }
+
+    return new Vec2(this.x, this.y);
+  }
+
   this.tile = function () {
     return 'blank';
   }
 };
 
-var Vec = require('../vec/lib.js');
+var Vec2 = require('../vec').Vec2;

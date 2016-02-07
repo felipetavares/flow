@@ -146,4 +146,4 @@ function Compositor () {
 
 exports.Compositor = Compositor;
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');

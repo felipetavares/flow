@@ -4,8 +4,10 @@ var game;
 var compositor;
 /* Link to server */
 var socket;
-
+/* Things that we draw over */
 var ui;
+/* Off-screen buffer */
+var offscreen;
 
 exports.init = function (_socket, _game) {
   /*
@@ -14,6 +16,12 @@ exports.init = function (_socket, _game) {
   compositor = new Compositor.Compositor();
   socket = _socket;
   game = _game;
+
+  offscreen = Terminal.ScreenBuffer.create({
+    dst: Terminal.terminal,
+    width: Terminal.terminal.width,
+    height: Terminal.terminal.height
+  });
 
   ui = new Ui.Ui();
 
@@ -48,6 +56,8 @@ exports.init = function (_socket, _game) {
         if (msg.error) {
           return true;
         } else {
+          game.map.me = msg.you;
+
           server(['screen', Terminal.terminal.width, Terminal.terminal.height], function () {
             // 1 sec timeout
             timeout(1);
@@ -56,8 +66,8 @@ exports.init = function (_socket, _game) {
       },
       'm:screen': function (state, msg) {
         compositor.goTo(['game']);
-        game.loadState(msg, function () {
-          Terminal.terminal('hi!');
+        game.map.partialLoad(msg, new Vec2(Terminal.terminal.width, Terminal.terminal.height),
+        function () {
           Terminal.terminal.color(7);
           Terminal.terminal.bgColor(0);
           Terminal.terminal.clear();
@@ -96,14 +106,29 @@ exports.init = function (_socket, _game) {
       },
       't:clear': function () {
         ui.clear(game.map);
-
         render();
       },
       'm:update': function (state, msg) {
-        game.loadState(msg, function () {
-          render();
-          ui.draw();
+        game.map.partialLoad(msg, new Vec2(Terminal.terminal.width, Terminal.terminal.height),
+        function () {
+          try {
+            render();
+            ui.draw();
+          } catch (e) {
+            process.stderr.write(e.stack);
+          }
         });
+        //compositor.goTo(['processing']);
+        compositor.goTo(['game']);
+      }
+    },
+    'processing': {
+      't:go': function () {
+        compositor.goTo(['game']);
+      },
+      't:clear': function () {
+        ui.clear(game.map);
+        render();
       }
     }
   });
@@ -212,7 +237,7 @@ exports.message = function (msg) {
     game.token = msg.token;
 
   for (var m in msg.messages) {
-    ui.printSegment(msg.messages[m].text, new Vec.Vec2(1, 1));
+    ui.printSegment(msg.messages[m].text, new Vec2(1, 1));
 
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(function () {
@@ -235,19 +260,44 @@ function render () {
     'white': 7
   };
 
-  for (var u in game.map.updatedPositions) {
-    var pos = game.map.updatedPositions[u];
-    var tileset = game.map.terminalTileset;
+  var tileset = game.map.tileset;
 
-    var char = tileset.character(tileset.code(game.map.queryTile(pos)));
+  for (var u in game.map.updated) {
+    var pos = game.map.updated[u];
 
-    var screenPos = pos.sub(game.map.min).add(new Vec.Vec2(1, 1));
+    var char = tileset.character(tileset.code(game.map.queryTile(pos.add(game.map.min))));
 
-    Terminal.terminal.moveTo(screenPos.x, screenPos.y);
-    Terminal.terminal.color(colors[char.fg]);
-    Terminal.terminal.bgColor(colors[char.bg]);
-    Terminal.terminal(char.char);
+    offscreen.put({
+      x: pos.x,
+      y: pos.y,
+      attr: {
+        color: colors[char.fg],
+        bgColor: colors[char.bg]
+      }
+    }, char.char);
   }
+
+  /*
+  for (var y=0;y<Terminal.terminal.height;y++) {
+    for (var x=0;x<Terminal.terminal.width;x++) {
+      var pos = new Vec2(x, y);
+
+      var char = tileset.character(tileset.code(game.map.queryTile(pos.add(game.map.min))));
+
+      offscreen.put({
+        x: pos.x,
+        y: pos.y,
+        attr: {
+          color: colors[char.fg],
+          bgColor: colors[char.bg]
+        }
+      }, char.char);
+    }
+  }*/
+
+  offscreen.draw({delta: true});
+
+  compositor.insert('t:go');
 }
 
 function renderBackground () {
@@ -263,7 +313,7 @@ function renderBackground () {
   };
 
 
-  var tileset = game.map.terminalTileset;
+  var tileset = game.map.tileset;
   var char = tileset.character(tileset.code('blank'));
   var chars = Terminal.terminal.width*Terminal.terminal.height;
 
@@ -271,15 +321,19 @@ function renderBackground () {
   Terminal.terminal.color(colors[char.fg]);
   Terminal.terminal.bgColor(colors[char.bg]);
 
+  var str = '';
+
   for (var i=0;i<chars;i++) {
-    Terminal.terminal(char.char);
+    str += char.char;
   }
+
+  Terminal.terminal(str);
 }
 
 function server (data, done) {
-  var msg = new Buffer(JSON.stringify(new Packet.Action(data, game.token)));
-
-  socket.send(msg, 0, msg.length, 41322, '::1', done);
+  Util.compress(new Packet.Action(data, game.token), function (msg) {
+    socket.send(msg, 0, msg.length, 41322, '::1', done);
+  });
 }
 
 function quit (code) {
@@ -303,9 +357,10 @@ function timeout (time) {
 }
 
 var Crypto = require('crypto');
-var Packet = require('../packet/lib.js');
-var Vec = require('../vec/lib.js');
-var Map = require('../map/lib.js');
+var Packet = require('../packet');
+var Vec2 = require('../vec').Vec2;
+var Map = require('../map');
 var Compositor = require('./compositor.js');
 var Terminal = require('terminal-kit');
 var Ui = require('./ui.js');
+var Util = require('../util');

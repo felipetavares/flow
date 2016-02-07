@@ -55,5 +55,5 @@ function Ui () {
 
 module.exports.Ui = Ui;
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');
 var Terminal = require('terminal-kit');

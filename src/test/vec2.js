@@ -1,5 +1,5 @@
-var Vec = require('../vec/lib.js');
-var Test = require('./lib.js');
+var Vec = require('../vec');
+var Test = require('./');
 
 exports.name = 'Vec.Vec2';
 exports.test = function () {

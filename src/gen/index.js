@@ -7,8 +7,8 @@ module.exports.map = function (_map) {
 function point (O, pos) {
   if (map) {
     var o = new O();
-    o.pos = pos;
-    map.add(o);
+    o.pos(pos);
+    map.insert(o);
 
     return o;
   }
@@ -16,7 +16,7 @@ function point (O, pos) {
 
 module.exports.line = function (O, start, delta) {
   if (map) {
-    var pos = map.generatePositions(start, delta);
+    var pos = Util.generatePositions(start, delta);
     pos.splice(0, 0, start);
 
     for (var p in pos) {
@@ -26,3 +26,5 @@ module.exports.line = function (O, start, delta) {
 }
 
 module.exports.point = point;
+
+var Util = require('../util');

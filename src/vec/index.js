@@ -40,41 +40,49 @@ function Vec2 (x, y) {
   }
 
   this.quad = function () {
-  if (this.q1()) {
-    return 1;
-  } else
-  if (this.q2()) {
-      return 2;
-  } else
-  if (this.q3()) {
-      return 3;
-  } else
-  if (this.q4()) {
-      return 4;
-  } else {
-      return 0;
-  }
+    if (this.q1()) {
+      return 1;
+    } else
+    if (this.q2()) {
+        return 2;
+    } else
+    if (this.q3()) {
+        return 3;
+    } else
+    if (this.q4()) {
+        return 4;
+    } else {
+        return 0;
+    }
   }
 
   this.eq = function (v) {
-  return Math.abs(this.x-v.x) < this.zero &&
-         Math.abs(this.y-v.y) < this.zero;
+    return Math.abs(this.x-v.x) < this.zero &&
+           Math.abs(this.y-v.y) < this.zero;
   }
 
   this.add = function (v) {
-  return new Vec2(this.x+v.x, this.y+v.y);
+    return new Vec2(this.x+v.x, this.y+v.y);
   }
 
   this.sub = function (v) {
-  return new Vec2(this.x-v.x, this.y-v.y);
+    return new Vec2(this.x-v.x, this.y-v.y);
   }
 
   this.mul = function (s) {
-  return new Vec2(this.x*s, this.y*s);
+    return new Vec2(this.x*s, this.y*s);
   }
 
   this.div = function (s) {
-  return new Vec2(this.x/s, this.y/s);
+    return new Vec2(this.x/s, this.y/s);
+  }
+
+  this.divVec = function (v) {
+    return new Vec2(this.x/v.x, this.y/v.y);
+  }
+
+  this.mulVec = function (v) {
+    return new Vec2(this.x*v.x, this.y*v.y);
   }
 
   this.dot = function (v) {
@@ -94,7 +102,7 @@ function Vec2 (x, y) {
   }
 
   this.normalize = function () {
-  this = this.norm();
+  this.assign(this.norm());
   }
 
   this.addeq = function (v) {
@@ -127,6 +135,16 @@ function Vec2 (x, y) {
           this.scalarInteger(this.y));
   }
 
+  this.integerFloor = function () {
+    return new Vec2(Math.floor(this.x),
+                    Math.floor(this.y));
+  }
+
+  this.integerCeil = function () {
+    return new Vec2(Math.ceil(this.x),
+                    Math.ceil(this.y));
+  }
+
   this.scalarInteger = function (x) {
   if (x < 0) {
       return Math.floor(x);
@@ -134,6 +152,10 @@ function Vec2 (x, y) {
   if (x > 0) {
       return Math.floor(x);
   }
+  }
+
+  this.clone = function () {
+    return new Vec2(this.x, this.y);
   }
 }
 

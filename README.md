@@ -37,6 +37,6 @@ If you wish to run the tests, type
 
 ## Writing tests
 
-Create a file in `src/test` and add a `loadTest` statement to `src/test/lib.js`.
+Create a file in `src/test` and add a `loadTest` statement to `src/test/index.js`.
 
 Follow the structure from `src/test/vec2.js`.

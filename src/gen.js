@@ -39,7 +39,7 @@ function interactive (to, from) {
 
   load(from, function (map) {
     if (!map)
-      map = new Map.Map();
+      map = new Map.Map(new Vec.Vec2(10000, 10000));
 
     compositor.on({
       'clear': function () {
@@ -106,10 +106,10 @@ function run (from, to) {
 }
 
 function save (map, to, done) {
-  map.clear();
+  //map.clear();
 
   Util.serialize(map, function (data) {
-    data = JSON.stringify(data);
+    data = JSON.stringify(data, null, 2);
 
     Fs.writeFile(to, data, function (error) {
       if (error) {
@@ -141,10 +141,10 @@ function load (from, done) {
 }
 
 var Compositor = require('./interface/compositor.js');
-var Util = require('./util/lib.js');
-var Map = require('./map/lib.js');
+var Util = require('./util');
+var Map = require('./map');
 var Fs = require('fs');
-var Objects = require('./objects/lib.js');
-var Vec = require('./vec/lib.js');
+var Objects = require('./objects');
+var Vec = require('./vec');
 
 init();

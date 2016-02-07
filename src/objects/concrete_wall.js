@@ -15,5 +15,5 @@ module.exports = {
   'ConcreteWall': ConcreteWall
 }
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');
 var DefaultObject = require('./default.js');

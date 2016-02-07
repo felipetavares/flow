@@ -2,15 +2,15 @@
 
 var Fs = require('fs');
 var Sudp = require('sudp');
-var Game = require('./game/lib.js');
-var Cmd = require('./cmd/lib.js');
-var Objects = require('./objects/lib.js');
-var User = require('./user/lib.js');
-var Packet = require('./packet/lib.js');
-var Test = require('./test/lib.js');
+var Game = require('./game');
+var Cmd = require('./cmd');
+var Objects = require('./objects');
+var User = require('./user');
+var Packet = require('./packet');
+var Test = require('./test');
 var Package = require('../package.json')
-var Log = require('./log/lib.js');
-var Vec = require('./vec/lib.js');
+var Log = require('./log');
+var Vec = require('./vec');
 
 var socket = Sudp.createSocket('udp6');
 var stdin = process.openStdin();
@@ -75,33 +75,33 @@ socket.on('error', function (error) {
 
 /* When we receive an UDP packet */
 socket.on('message', function (msg, remoteAddr) {
-  var action = JSON.parse(msg.toString());
+  Util.decompress(msg, function (action) {
+    Log.heading('action');
+    Log.log('Address: '+remoteAddr.address);
+    Log.log('Port: '+remoteAddr.port);
+    Log.log('Command: '+action.action[0]);
 
-  Log.heading('action');
-  Log.log('Address: '+remoteAddr.address);
-  Log.log('Port: '+remoteAddr.port);
-  Log.log('Command: '+action.action[0]);
+    if (action.token) {
+      var user;
+      if (user = User.get(action.token)) {
+        Log.log('Token: valid');
+        Log.log('User name: '+user.name);
+        game.execute(action.action, remoteAddr, action.token);
+      } else {
+        Log.log('Token: invalid');
+      }
 
-  if (action.token) {
-    var user;
-    if (user = User.get(action.token)) {
-      Log.log('Token: valid');
-      Log.log('User name: '+user.name);
-      game.execute(action.action, remoteAddr, action.token);
+      /* Send game state to users */
+      User.update(socket, action.token, game);
     } else {
-      Log.log('Token: invalid');
+      // Only login & register are allowed without an
+      // access token
+      if (action.action.length == 3 &&
+          action.action[0] == 'login' ||
+          action.action[0] == 'register')
+        game.execute(action.action, remoteAddr, action.token);
     }
-  } else {
-    // Only login & register are allowed without an
-    // access token
-    if (action.action.length == 3 &&
-        action.action[0] == 'login' ||
-        action.action[0] == 'register')
-      game.execute(action.action, remoteAddr, action.token);
-  }
-
-  /* Send game state to users */
-  User.update(socket, game);
+  });
 });
 
 /* When the server socket is created */
@@ -123,7 +123,8 @@ socket.on('close', function () {
 });
 
 function save (done) {
-  game.map.clear();
+  done();
+
   Util.serialize(game.map, function (data) {
     // Pretty
     //data = JSON.stringify(data, null, 2);
@@ -159,9 +160,7 @@ function load (done) {
               Maybe it would be better to move this over
               to a function at map/lib.js?
             */
-            for (var o in game.map.objects) {
-              game.map.objects[o].map = game.map;
-            }
+            game.map.setMap();
 
             User.load(done);
           });
@@ -193,7 +192,7 @@ function init () {
 
       if (character) {
         var position = new Vec.Vec2(input[1], input[2]);
-        position = position.add(character.pos);
+        position = position.add(character.pos());
 
         game.map.action('access', position, character, User.get(token));
       }
@@ -211,38 +210,39 @@ function init () {
       var state = new Packet.WorldState();
       state.token = token;
       state.action= input;
-      var retMsg = new Buffer(JSON.stringify(state));
-
-      socket.send(retMsg, 0, retMsg.length,
-                  addr.port,
-                  addr.address);
+      Util.compress(state, function (msg) {
+        socket.send(msg, 0, msg.length,
+                    addr.port,
+                    addr.address);
+      });
     })]]));
 
     game.addCmd(new Cmd.Cmd(3, [[new Cmd.Exec('login', function (addr, token, input) {
       Log.heading('login');
       Log.log('Name: '+input[1])
 
-      var token = User.login(input[1], input[2], addr);
+      var token = User.login(input[1], input[2], addr, game.map);
 
       if (!token) {
         var state = new Packet.WorldState();
         state.error = 'Invalid login.';
         state.action = input;
-        var retMsg = new Buffer(JSON.stringify(state));
-
-        socket.send(retMsg, 0, retMsg.length,
-                    addr.port,
-                    addr.address);
+        Util.compress(state, function (msg) {
+          socket.send(msg, 0, msg.length,
+                      addr.port,
+                      addr.address);
+        });
         Log.log('Status: fail');
       } else {
         var state = new Packet.WorldState();
         state.token = token;
         state.action= input;
-        var retMsg = new Buffer(JSON.stringify(state));
-
-        socket.send(retMsg, 0, retMsg.length,
-                    addr.port,
-                    addr.address);
+        state.you = User.characterIds(token);
+        Util.compress(state, function (msg) {
+          socket.send(msg, 0, msg.length,
+                      addr.port,
+                      addr.address);
+        });
         Log.log('Status: success');
       }
     })]]));
@@ -267,13 +267,12 @@ function init () {
       Log.log ('Name: '+input[1]);
 
       if (!User.exists(input[1])) {
-        var cId = User.createCharacterId();
+        var character = new Objects.Character();
+        game.add(character);
+        User.add(new User.User(input[1], input[2], character.uniqueId, addr));
 
         Log.log ('Creating character for user');
-        Log.log ('CID is '+cId);
-
-        User.add(new User.User(input[1], input[2], cId, addr));
-        game.add(new Objects.Character(cId));
+        Log.log ('ID is '+character.uniqueId);
 
         game.execute(['login', input[1], input[2]], addr, token);
       }
@@ -288,6 +287,6 @@ function init () {
   files and on the way we 'unserialize' objects, we
   need to load util at the end of our definitions.
 */
-var Util = require('./util/lib.js');
+var Util = require('./util');
 
 init();

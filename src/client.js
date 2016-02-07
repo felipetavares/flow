@@ -20,23 +20,24 @@ function init () {
   game = new Game.Game();
 
   socket.on('message', function (msg, remoteAddr) {
-    var state = JSON.parse(msg.toString());
-
-    Interface.message(state);
+    Util.decompress(msg, function (state) {
+      Interface.message(state);
+    });
   });
 
-  game.map.terminalTileset.load('./assets/terminal.json', function () {
+  game.map.tileset.load('./assets/terminal.json', function () {
     Interface.init(socket, game);
 
     socket.bind();
   });
 }
 
-var Objects = require('./objects/lib.js');
-var Map = require('./map/lib.js');
-var Vec = require('./vec/lib.js');
-var Game = require('./game/lib.js');
+var Objects = require('./objects');
+var Map = require('./map');
+var Vec = require('./vec');
+var Game = require('./game');
 var Sudp = require('sudp');
-var Interface = require('./interface/lib.js');
+var Interface = require('./interface');
+var Util = require('./util');
 
 init();

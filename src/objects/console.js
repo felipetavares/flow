@@ -11,6 +11,10 @@ function Console () {
   }
 
   this.access = function (character, user) {
+    console.log('access');
+
+    user.setDirty(this, 'disabled');
+
     this.disabled = !this.disabled;
 
     this.activateConnected(this.disabled?'disable':'enable', character, user);
@@ -25,5 +29,5 @@ module.exports = {
   'Console': Console
 }
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');
 var DefaultObject = require('./default.js');

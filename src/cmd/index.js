@@ -56,4 +56,4 @@ module.exports = {
   'Exec': Exec
 }
 
-var Vec = require('../vec/lib.js');
+var Vec = require('../vec');
