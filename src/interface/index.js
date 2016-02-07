@@ -106,20 +106,22 @@ exports.init = function (_socket, _game) {
       },
       't:clear': function () {
         ui.clear(game.map);
+        game.map.min.addeq(new Vec2(1, 1));
         render();
+        game.map.min.subeq(new Vec2(1, 1));
       },
       'm:update': function (state, msg) {
         game.map.partialLoad(msg, new Vec2(Terminal.terminal.width, Terminal.terminal.height),
         function () {
           try {
             render();
-            ui.draw();
+            ui.draw(offscreen);
+            offscreen.draw({delta: true});
           } catch (e) {
             process.stderr.write(e.stack);
           }
         });
-        //compositor.goTo(['processing']);
-        compositor.goTo(['game']);
+        compositor.goTo(['processing']);
       }
     },
     'processing': {
@@ -128,7 +130,10 @@ exports.init = function (_socket, _game) {
       },
       't:clear': function () {
         ui.clear(game.map);
+        game.map.min.addeq(new Vec2(1, 1));
         render();
+        game.map.min.subeq(new Vec2(1, 1));
+        compositor.goTo(['processing']);
       }
     }
   });
@@ -237,7 +242,7 @@ exports.message = function (msg) {
     game.token = msg.token;
 
   for (var m in msg.messages) {
-    ui.printSegment(msg.messages[m].text, new Vec2(1, 1));
+    ui.printSegment(offscreen, msg.messages[m].text, new Vec2(0, 0));
 
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(function () {

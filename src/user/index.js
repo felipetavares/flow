@@ -40,6 +40,10 @@ function User (name, password, characterId, addr) {
     delete this.screen;
   }
 
+  this.message = function (msg) {
+    this.messages.push(msg);
+  }
+
   this.login = function (name, password, addr) {
     if (name == this.name) {
       if (password == this.password) {
@@ -65,9 +69,11 @@ function User (name, password, characterId, addr) {
   this.send = function (socket, map, token) {
     var dirty = this.dirtyMap.get();
     var packet = new Packet.WorldState();
-    /*
-      TODO: Fill packet.messages
-    */
+
+    if (this.messages.length > 0) {
+      packet.messages = this.messages;
+      this.messages = new Array();
+    }
 
     for (var d in dirty) {
       if (dirty[d] === true) {

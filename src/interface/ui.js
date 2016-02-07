@@ -6,43 +6,53 @@ function Segment (pos, len, text) {
 
 function Ui () {
   this.dirtySegments = new Array();
-  this.offset = new Vec.Vec2(0, 0);
+  this.offset = new Vec2(0, 0);
 
   // Write a string to one line of the screen
-  this.printSegment = function (segment, pos) {
+  this.printSegment = function (offscreen, segment, pos) {
     pos = pos.add(this.offset);
 
     this.dirtySegments.push(new Segment(pos, segment.length, segment));
 
-    Terminal.terminal.color(7);
-    Terminal.terminal.bgColor(0);
-    Terminal.terminal.moveTo(pos.x, pos.y);
-    Terminal.terminal(segment);
+    offscreen.put({
+      x: pos.x,
+      y: pos.y,
+      attr: {
+        color: 7,
+        bgColor: 0
+      }
+    }, segment);
 
-    this.offset.y = pos.y;
+    this.offset.y = pos.y+1;
   }
 
-  this.draw = function () {
+  this.draw = function (offscreen) {
     for (var d in this.dirtySegments) {
       var segment = this.dirtySegments[d];
 
-      Terminal.terminal.color(7);
-      Terminal.terminal.bgColor(0);
-      Terminal.terminal.moveTo(segment.pos.x, segment.pos.y);
-      Terminal.terminal(segment.text);
+      offscreen.put({
+        x: segment.pos.x,
+        y: segment.pos.y,
+        attr: {
+          color: 7,
+          bgColor: 0
+        }
+      }, segment.text);
     }
   }
 
   // Tell where to clear
   this.clear = function (map) {
-    var left = new Vec.Vec2(1, 0);
+    map.updated = new Array();
+
+    var left = new Vec2(1, 0);
 
     for (var d in this.dirtySegments) {
       var p = this.dirtySegments[d].pos;
       var e = p.add(left.mul(this.dirtySegments[d].len+1));
 
       while (!p.eq(e)) {
-        map.updatedPositions.push(p.add(map.min).sub(new Vec.Vec2(1, 1)));
+        map.updated.push(p);
         p = p.add(left);
       }
     }
@@ -55,5 +65,5 @@ function Ui () {
 
 module.exports.Ui = Ui;
 
-var Vec = require('../vec');
+var Vec2 = require('../vec').Vec2;
 var Terminal = require('terminal-kit');

@@ -123,8 +123,6 @@ module.exports.Map = function (size) {
 
     this.updated = new Array();
 
-    // process.stderr.write(JSON.stringify(message, 2)+'\n');
-
     Util.unserialize(message, function (unserialized) {
       var min = null;
 
@@ -142,7 +140,7 @@ module.exports.Map = function (size) {
       if (min === null)
         min = _this.min;
       if (_this.min === null)
-        _this.min = min
+        _this.min = min;
 
       // We moved
       // So, update the positions of everything in the screen
@@ -170,7 +168,8 @@ module.exports.Map = function (size) {
         }
       }
 
-      _this.min = min;
+      if (min !== null)
+        _this.min = min;
 
       done();
     });

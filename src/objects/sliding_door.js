@@ -12,14 +12,14 @@ function SlidingDoor () {
 
     this.closed = false;
 
-    // this.map.message(new Packet.Message('The sliding door opens', user));
+    user.message(new Packet.Message('The sliding door opens'));
   }
   this.close = function (character, user) {
     user.setDirty(this, 'closed');
 
     this.closed = true;
 
-    // this.map.message(new Packet.Message('The sliding door closes', user));
+    user.message(new Packet.Message('The sliding door closes'));
   }
 
   this.tile = function () {

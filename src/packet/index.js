@@ -1,7 +1,5 @@
 function Message (text, user) {
   this.text = text===undefined?'':text;
-
-  this.user = user===undefined?null:user;
 }
 
 function Action (action, token) {
