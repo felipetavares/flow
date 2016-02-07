@@ -106,8 +106,6 @@ function run (from, to) {
 }
 
 function save (map, to, done) {
-  //map.clear();
-
   Util.serialize(map, function (data) {
     data = JSON.stringify(data, null, 2);
 

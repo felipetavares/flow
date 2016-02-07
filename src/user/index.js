@@ -31,6 +31,15 @@ function User (name, password, characterId, addr) {
   /* All close things */
   this.close = new Object();
 
+  this.clear = function () {
+    delete this.close;
+    delete this.closeUsers;
+    delete this.dirtyMap;
+    delete this.messages;
+    delete this.addr;
+    delete this.screen;
+  }
+
   this.login = function (name, password, addr) {
     if (name == this.name) {
       if (password == this.password) {
@@ -90,9 +99,11 @@ function User (name, password, characterId, addr) {
         for (var u in _this.closeUsers) {
           var user = _this.closeUsers[u];
 
-          socket.send(compressedPacket, 0, compressedPacket.length,
-                      user.addr.port,
-                      user.addr.address);
+          if (user.addr) {
+            socket.send(compressedPacket, 0, compressedPacket.length,
+                        user.addr.port,
+                        user.addr.address);
+          }
         }
       });
     });
@@ -158,24 +169,13 @@ function load (done) {
           Util.unserialize(users, function (_users) {
             users = _users;
 
-            /*
-              Ensure we have this propertie even if it
-              wasn't in the fs version for any reason
-
-              (e.g.: someone overitten the file)
-            */
-            if (!users.maxCharacterId)
-              users.maxCharacterId = 1;
-
             done(true);
           });
         } else {
-          users.maxCharacterId = 1;
           done(false);
         }
       });
     } else {
-      users.maxCharacterId = 1;
       done(false);
     }
   });
@@ -183,6 +183,10 @@ function load (done) {
 
 /* Save users to disk */
 function save (done) {
+  for (var u in users) {
+    users[u].clear();
+  }
+
   Util.serialize(users, function (data) {
     data = JSON.stringify(data);
 

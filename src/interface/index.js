@@ -277,24 +277,6 @@ function render () {
     }, char.char);
   }
 
-  /*
-  for (var y=0;y<Terminal.terminal.height;y++) {
-    for (var x=0;x<Terminal.terminal.width;x++) {
-      var pos = new Vec2(x, y);
-
-      var char = tileset.character(tileset.code(game.map.queryTile(pos.add(game.map.min))));
-
-      offscreen.put({
-        x: pos.x,
-        y: pos.y,
-        attr: {
-          color: colors[char.fg],
-          bgColor: colors[char.bg]
-        }
-      }, char.char);
-    }
-  }*/
-
   offscreen.draw({delta: true});
 
   compositor.insert('t:go');

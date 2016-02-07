@@ -123,8 +123,6 @@ socket.on('close', function () {
 });
 
 function save (done) {
-  done();
-
   Util.serialize(game.map, function (data) {
     // Pretty
     //data = JSON.stringify(data, null, 2);

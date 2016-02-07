@@ -81,7 +81,6 @@ module.exports.Map = function (size) {
 
     for (var o in objects) {
       if (objects[o][name]) {
-        console.log(objects[o]);
         objects[o][name](character, user);
         break;
       }
@@ -148,7 +147,7 @@ module.exports.Map = function (size) {
       // We moved
       // So, update the positions of everything in the screen
       if (min !== null && (min !== _this.min || !min.eq(_this.min))) {
-        var objects = _this.inside(min, min.add(screen));
+        var objects = _this.inside(min.sub(new Vec2(1, 1)), min.add(screen).add(new Vec2(2, 2)));
 
         for (var o in objects) {
           _this.updatePos(objects[o].pos(), _this.min);
@@ -164,7 +163,7 @@ module.exports.Map = function (size) {
       // We moved
       // So, update the positions of everything in the screen
       if (min !== null && (min !== _this.min || !min.eq(_this.min))) {
-        var objects = _this.inside(min, min.add(screen));
+        var objects = _this.inside(min.sub(new Vec2(1, 1)), min.add(screen).add(new Vec2(2, 2)));
 
         for (var o in objects) {
           _this.updatePos(objects[o].pos(), min);
@@ -194,7 +193,7 @@ module.exports.Map = function (size) {
     } else {
       var real = this.get(o);
       if (oldMin !== undefined)
-        this.updatePos(real.pos(), oldMin);
+       this.updatePos(real.pos(), oldMin);
 
       // Maybe check before doing this?
       this.storage.move(real, new Vec2(obj.x===undefined?real.x:obj.x,
@@ -205,7 +204,7 @@ module.exports.Map = function (size) {
       }
 
       if (min !== undefined)
-        this.updatePos(real.pos(), min);
+       this.updatePos(real.pos(), min);
     }
   }
 
