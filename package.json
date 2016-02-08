@@ -18,5 +18,8 @@
     "flow-client": "src/client.js",
     "flow-server": "src/server.js",
     "flow-gen": "src/gen.js"
+  },
+  "scripts": {
+    "start": "src/server.js"
   }
 }
