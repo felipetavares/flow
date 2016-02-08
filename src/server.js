@@ -20,7 +20,7 @@ var game = new Game.Game();
   from the first and add one to the second, repeat
   until you have 5 numbers
 */
-var defaultPort = process.env.port?process.env.port:41322;
+var defaultPort = process.env.port?process.env.PORT:41322;
 var mapFileName = 'map.json';
 
 Log.log('Flow Server Version '+Package.version+'\n');
