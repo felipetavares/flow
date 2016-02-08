@@ -319,7 +319,7 @@ function renderBackground () {
 
 function server (data, done) {
   Util.compress(new Packet.Action(data, game.token), function (msg) {
-    socket.send(msg, 0, msg.length, 41322, 'ctrl-c.club', done);
+    socket.send(msg, 0, msg.length, 41322, 'flowmud.herokuapp.com', done);
   });
 }
 
