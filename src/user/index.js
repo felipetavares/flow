@@ -45,6 +45,8 @@ function User (name, password, characterId, addr) {
   }
 
   this.login = function (name, password, addr) {
+    this.message(new Packet.Message(this.name+' awakens!'));
+
     if (name == this.name) {
       if (password == this.password) {
         this.addr = addr;
