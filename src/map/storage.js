@@ -6,7 +6,7 @@ module.exports = function (size) {
   }
 
   this.grid = new Grid(size);
-  this.idMap = new Array();
+  this.idMap = new Object();
   this.lastUniqueId = 0;
 
   this.setMap = function (map) {
@@ -16,6 +16,15 @@ module.exports = function (size) {
       this.idMap[id].map = map;
       this.insert(this.idMap[id], this.idMap[id].pos());
     }
+  }
+
+  this.all = function () {
+    return this.idMap;
+  }
+
+  this.clear = function () {
+    this.grid.clear();
+    this.idMap = new Object();
   }
 
   this.generateUniqueId = function () {

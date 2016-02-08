@@ -210,6 +210,18 @@ module.exports.Map = function (size) {
   this.setMap = function () {
     this.storage.setMap(this);
   }
+
+  this.clearObjects = function (type, result) {
+    var objects = this.storage.all();
+
+    this.storage.clear();
+
+    for (var o in objects) {
+      if ((objects[o].id === type) !== result) {
+        this.storage.insert(objects[o]);
+      }
+    }
+  }
 }
 
 module.exports.Grid = require('./grid.js');

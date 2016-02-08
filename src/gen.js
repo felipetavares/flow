@@ -43,11 +43,7 @@ function interactive (to, from) {
 
     compositor.on({
       'clear': function () {
-        for (o in map.objects) {
-          if (map.objects[o].id !== 'Objects.Character') {
-            delete map.objects[o];
-          }
-        }
+        map.clearObjects('Objects.Character', false);
         return true;
       },
       'save': function () {
@@ -73,8 +69,12 @@ function interactive (to, from) {
         process.exit(0);
       },
       ':any': function (name) {
-        var type = require('./gen/'+name+'.js');
-        var obj = new type(undefined, map);
+        try {
+          var type = require('./gen/'+name+'.js');
+          var obj = new type(undefined, map);
+        } catch (e) {
+          console.log(e);
+        }
 
         return true;
       }
