@@ -39,6 +39,15 @@
 * messages to the user.
 * action composition.
 
+# Character stats
+
+Characters generated with random stats and stat visualization.
+
+For this we will also need a stat window.
+
+And a system that stregthens stats based on use, so actions will
+be linked with specific stats and every time an action is used, the related stats are increased.
+
 # Design: *Explorer* class ship
 
 > It was an Explorer class ship. Explorer ships were designed to easily enter dense atmospheres and thus had an extremely aerodynamic design and small, retractile wings.
