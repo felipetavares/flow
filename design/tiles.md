@@ -16,3 +16,33 @@ If no alpha channel is supported use a solid color, preferably black or white.
 * name: `character`
 
 A player's character.
+
+## Concrete Wall
+
+* name: `concrete_wall`
+
+A wall made of concrete.
+
+## Sliding Door (Closed)
+
+* name: `sliding_door:closed`
+
+A metal door that opens by sliding inside the wall. Closed.
+
+## Sliding Door (Open)
+
+* name: `sliding_door:open`
+
+A metal door that opens by sliding inside the wall. Open.
+
+## Console (Disabled)
+
+* name: `console:disabled`
+
+A dumb terminal that can be either enabled or disabled. Disabled.
+
+## Console (Enabled)
+
+* name: `console:enabled`
+
+A dumb terminal that can be either enabled or disabled. Enabled.

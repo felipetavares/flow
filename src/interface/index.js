@@ -299,7 +299,6 @@ function renderBackground () {
     'white': 7
   };
 
-
   var tileset = game.map.tileset;
   var char = tileset.character(tileset.code('blank'));
   var chars = Terminal.terminal.width*Terminal.terminal.height;
