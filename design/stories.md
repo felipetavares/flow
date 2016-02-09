@@ -41,6 +41,29 @@
 
 # Character stats
 
+> philips awakens!
+
+```
+@
+*
+```
+
+> philips grabs a rock.
+
+```
+@
+
+```
+
+> philips throws a rock.
+
+```
+@ *
+
+```
+
+> philips [throwing+1]
+
 Characters generated with random stats and stat visualization.
 
 For this we will also need a stat window.
