@@ -118,6 +118,12 @@ This direction can be:
 
 The keypad numbers/`h`, `j`, `k`, and `l` can be used to move around.
 
+# Combat
+
+Meele and gun combat. Also, lots of explosives.
+
+Maybe hacking?
+
 # Thank you
 
 for motivating me to start this project!
