@@ -38,3 +38,51 @@
 * colored tiles.
 * messages to the user.
 * action composition.
+
+# Design: *Explorer* class ship
+
+> It was an Explorer class ship. Explorer ships were designed to easily enter dense atmospheres and thus had an extremely aerodynamic design and small, retractile wings.
+
+> At that moment, she saw a small ship approaching through the transparent polymer. It was an Explorer ship. It was the first time she saw a ship that close. It was beautiful. Small holes all over the fuselage made it extremely maneuverable and in the back she could see a deep and a black pit. That was the output of the Flow Reactor used by the ship.
+
+So, this ship will have:
+
+* flow reactor output;
+* retractile wings;
+* gas escapes;
+* aerodynamic design.
+
+It is a small ship, but how small? Lets say 25 meters in length.
+
+```
+
+    |\
+     |\
+ -----------\
+>!!|%[%|%[%|[\-------
+>##|%.%|%.%|+...|..%=)
+>##--+---+--....+..%=)
+>!!........../-------
+ -----------/
+     |/
+    |/
+
+
+```
+
+## Tiles
+
+* `!`: fuel cell
+* `#`: flow reactor
+* `>`: reactor output
+* `%`: bed/confortable chair
+* `[`: cabinet
+* `.`: floor
+* `-`, `|`, `\`, `/`: polymer panel
+* `+`: doors
+* `=`: console
+* `)`: transparent polymer/window
+
+People use it for exploration, so it has to have bathroons and beds. Probably a kitchen?
+
+Maybe have multiple Z-levels?
