@@ -105,3 +105,38 @@ information about the login
 information about the login
 
 ```
+
+# Menus/Ui
+
+## Intro
+
+Lets talk a bit about how we reder things in *Flow*.
+
+First, the `Map` structure in the server is synced with the client. Then, we push to the Array `map.updated` all the positions (screen coordinates) that changed.
+
+Lastly we call the `render()` function from the interface to effectively draw on the screen everything that changed.
+
+## Logic
+
+Given the rendering flow discussed in the previous session, how could we implement an UI on top of that?
+
+A few things to keep in mind:
+
+1. Every time we render, if there is an overlay we need to draw it.
+2. When an overlay receives any event it needs to be redraw, this involves calling the render method with a list of updated positions.
+
+How to draw overlays on the render function? I propose a simple solution:
+
+* We still use the same idea of only rendering what is in the `updated` array
+* Now, instead of just asking the map at position x,y we ask first the ui, if there is something in the UI at that position, we don't need to ask the map.
+
+But how the UI will keep track of where it has overlays? Simple AABB/Point collision tests. They can also be used to determine which AABB (it will represent a window) is at the given position.
+
+I proppose also having windows do lazy rendering. They only define a function, lets call it `render` that receives a position (local) as argument and returns the character at that position.
+
+All the UI events will work in the following fashion:
+
+1. Event is received
+2. Windows are created/modified
+3. Updated positions are pushed to the `updated` array
+4. `render()` (from interface) calls the `render` method of the given windows for all positions and they return the respective characters.
