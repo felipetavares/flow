@@ -105,7 +105,7 @@ exports.init = function (_socket, _game) {
         return true;
       },
       't:clear': function () {
-        ui.clear(game.map);
+        //ui.clear(game.map);
         game.map.min.addeq(new Vec2(1, 1));
         render();
         game.map.min.subeq(new Vec2(1, 1));
@@ -115,7 +115,7 @@ exports.init = function (_socket, _game) {
         function () {
           try {
             render();
-            ui.draw(offscreen);
+            //ui.draw(offscreen);
             offscreen.draw({delta: true});
           } catch (e) {
             process.stderr.write(e.stack);
@@ -129,7 +129,7 @@ exports.init = function (_socket, _game) {
         compositor.goTo(['game']);
       },
       't:clear': function () {
-        ui.clear(game.map);
+        //ui.clear(game.map);
         game.map.min.addeq(new Vec2(1, 1));
         render();
         game.map.min.subeq(new Vec2(1, 1));
@@ -138,12 +138,39 @@ exports.init = function (_socket, _game) {
     }
   });
 
+  /*
+    Actions go here!
+  */
   compositor.on({
     'game': {
       'k:a': compositor.directional(function (d) {
         server(['access', d.x, d.y]);
         compositor.goTo(['game']);
-      })
+      }),
+      'k:c': function () {
+        myWindow = ui.event(Ui.EventType.CreateWindow, {
+          'size': function () {
+            return new Vec2(10, 10);
+          },
+          'pos': function () {
+            return new Vec2(0, 0)
+          },
+          'render': function (at) {
+            return new Character({
+              char: ' ',
+              bg: 'red',
+              fg: 'red'
+            });
+          }
+        }, game.map);
+
+        render();
+      },
+      'k:d': function () {
+        ui.event(Ui.EventType.DestroyWindow, myWindow, game.map);
+
+        render();
+      }
     }
   });
 
@@ -242,7 +269,7 @@ exports.message = function (msg) {
     game.token = msg.token;
 
   for (var m in msg.messages) {
-    ui.printSegment(offscreen, msg.messages[m].text, new Vec2(0, 0));
+    //ui.printSegment(offscreen, msg.messages[m].text, new Vec2(0, 0));
 
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(function () {
@@ -269,8 +296,11 @@ function render () {
 
   for (var u in game.map.updated) {
     var pos = game.map.updated[u];
+    var char = ui.render(pos);
 
-    var char = tileset.character(tileset.code(game.map.queryTile(pos.add(game.map.min))));
+    if (!char) {
+      char = tileset.character(tileset.code(game.map.queryTile(pos.add(game.map.min))));
+    }
 
     offscreen.put({
       x: pos.x,
@@ -348,5 +378,6 @@ var Vec2 = require('../vec').Vec2;
 var Map = require('../map');
 var Compositor = require('./compositor.js');
 var Terminal = require('terminal-kit');
-var Ui = require('./ui.js');
+var Ui = require('./ui.ref.js');
 var Util = require('../util');
+var Character = require('../map/tileset.js').Character;

@@ -14,11 +14,22 @@ function Vec2 (x, y) {
     return this.x <= 0 && this.y <= 0;
   }
 
+  this.positiveTight = function () {
+    return this.x > 0 && this.y > 0;
+  }
+
   this.inside = function (start, end) {
     var qa = start.sub(this);
     var qb = end.sub(this);
 
     return qa.negative() && qb.positive();
+  }
+
+  this.insideTight = function (start, end) {
+    var qa = start.sub(this);
+    var qb = end.sub(this);
+
+    return qa.negative() && qb.positiveTight();
   }
 
   // Which quadrant the vector is?
