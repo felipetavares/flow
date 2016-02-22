@@ -25,6 +25,40 @@ exports.init = function (_socket, _game) {
 
   ui = new Ui.Ui();
 
+  ui.createWindow('messages', {
+    '_size': new Vec2(0, 2),
+    'messages': new Array(),
+    'clear': function () {
+      this._size.y = 2;
+      this.messages = new Array();
+    },
+    'addMessage': function (msg) {
+      this._size.y ++;
+      if (msg.length+2 > this._size.x)
+        this._size.x = msg.length+2;
+      this.messages.push(msg);
+    },
+    'size': function () {
+      return this._size;
+    },
+    'pos': function () {
+      return new Vec2(0, 0)
+    },
+    'render': function (at) {
+      var char = ' ';
+
+      if (this.messages[at.y-1] &&
+          this.messages[at.y-1][at.x-1])
+        char = this.messages[at.y-1][at.x-1];
+
+      return new Character({
+        char: char,
+        bg: 'green',
+        fg: 'black'
+      });
+    }
+  });
+
   Terminal.terminal.grabInput(true);
   Terminal.terminal.fullscreen();
 
@@ -105,10 +139,11 @@ exports.init = function (_socket, _game) {
         return true;
       },
       't:clear': function () {
-        //ui.clear(game.map);
-        game.map.min.addeq(new Vec2(1, 1));
+        ui.event(Ui.EventType.DestroyWindow, ui.window('messages'), game.map);
+
         render();
-        game.map.min.subeq(new Vec2(1, 1));
+
+        ui.window('messages').clear();
       },
       'm:update': function (state, msg) {
         game.map.partialLoad(msg, new Vec2(Terminal.terminal.width, Terminal.terminal.height),
@@ -146,31 +181,7 @@ exports.init = function (_socket, _game) {
       'k:a': compositor.directional(function (d) {
         server(['access', d.x, d.y]);
         compositor.goTo(['game']);
-      }),
-      'k:c': function () {
-        myWindow = ui.event(Ui.EventType.CreateWindow, {
-          'size': function () {
-            return new Vec2(10, 10);
-          },
-          'pos': function () {
-            return new Vec2(0, 0)
-          },
-          'render': function (at) {
-            return new Character({
-              char: ' ',
-              bg: 'red',
-              fg: 'red'
-            });
-          }
-        }, game.map);
-
-        render();
-      },
-      'k:d': function () {
-        ui.event(Ui.EventType.DestroyWindow, myWindow, game.map);
-
-        render();
-      }
+      })
     }
   });
 
@@ -269,7 +280,17 @@ exports.message = function (msg) {
     game.token = msg.token;
 
   for (var m in msg.messages) {
-    //ui.printSegment(offscreen, msg.messages[m].text, new Vec2(0, 0));
+    var win = ui.window('messages');
+
+    ui.window('messages').addMessage(msg.messages[m].text);
+
+    // Makes sure we are displaying the window
+    if (!ui.showing(win))
+      ui.event(Ui.EventType.CreateWindow, win, game.map);
+
+    ui.event(Ui.EventType.WindowChanged, win, game.map);
+
+    render();
 
     clearTimeout(messageTimeout);
     messageTimeout = setTimeout(function () {

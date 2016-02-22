@@ -7,11 +7,22 @@
 
 var EventType = module.exports.EventType = {
   CreateWindow: 0,
-  DestroyWindow: 1
+  DestroyWindow: 1,
+  WindowChanged: 2
 };
 
 module.exports.Ui = function () {
+  this.namedWindows = new Object();
+
   this.windows = new Array();
+
+  this.createWindow = function (name, window) {
+    this.namedWindows[name] = window;
+  }
+
+  this.window = function (name) {
+    return this.namedWindows[name];
+  }
 
   this.showWindow = function (window) {
     this.windows.push(window);
@@ -23,6 +34,12 @@ module.exports.Ui = function () {
     if (index >= 0) {
       this.windows.splice(index, 1);
     }
+  }
+
+  this.showing = function (window) {
+    var index = this.windows.indexOf(window);
+
+    return index >= 0;
   }
 
   this.render = function (at) {
@@ -51,6 +68,10 @@ module.exports.Ui = function () {
       break;
       case EventType.DestroyWindow:
         this.hideWindow(data);
+        this.updateWindowArea(data, map);
+      break;
+      // TODO: ask the window just for the changed stuff
+      case EventType.WindowChanged:
         this.updateWindowArea(data, map);
       break;
     }
